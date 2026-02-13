@@ -22,6 +22,10 @@
             color: white;
             min-height: 100vh;
             overflow-x: hidden;
+        }
+
+        /* Default cursor - always visible */
+        body.custom-cursor {
             cursor: none;
         }
 
@@ -32,7 +36,7 @@
             border-radius: 50%;
             position: fixed;
             pointer-events: none;
-            z-index: 9999;
+            z-index: 99999;
             transition: transform 0.1s ease, background 0.2s ease;
             mix-blend-mode: difference;
         }
@@ -42,10 +46,13 @@
             border-radius: 50%;
             position: fixed;
             pointer-events: none;
-            z-index: 9998;
+            z-index: 99998;
             transition: transform 0.3s ease-out;
         }
-        .cursor.hover { transform: scale(2); background: var(--primary); }
+        .cursor.hover {
+            transform: scale(2);
+            background: var(--primary);
+        }
 
         /* Background Effects */
         .bg-animation {
@@ -207,7 +214,7 @@
             background: rgba(0, 0, 0, 0.9);
             backdrop-filter: blur(10px);
             z-index: 10000;
-            display: flex;
+            display: none;
             align-items: center;
             justify-content: center;
         }
@@ -342,6 +349,9 @@
         }
         .command-info {
             color: #00f0ff;
+        }
+        .command-warn {
+            color: #ffaa00;
         }
 
         /* Settings Modal */
@@ -779,9 +789,9 @@
                 action: () => {
                     let output = "Available commands:\n";
                     for (let cmd in COMMANDS) {
-                        output += `  ${cmd.padEnd(12)} - ${COMMANDS[cmd].desc}\n`;
+                        output += `  ${cmd.padEnd(15)} - ${COMMANDS[cmd].desc}\n`;
                     }
-                    output += "\nType any command to execute.";
+                    output += "\nPro tip: Use TAB to autocomplete commands";
                     return output;
                 }
             },
@@ -802,13 +812,19 @@
             whoami: {
                 desc: "Display current user",
                 action: () => {
-                    return `Current user: ${username}\nTier: ${isPremium ? 'PREMIUM' : 'FREE'}\nSession: ${usedKey || 'N/A'}`;
+                    return `Current user: ${username}\nTier: ${isPremium ? 'PREMIUM' : 'FREE'}\nSession: ${usedKey || 'N/A'}\nCloak: ${settings.autoCloak ? 'ON' : 'OFF'}`;
                 }
             },
             time: {
                 desc: "Show current time",
                 action: () => {
                     return new Date().toLocaleString();
+                }
+            },
+            date: {
+                desc: "Show current date",
+                action: () => {
+                    return new Date().toDateString();
                 }
             },
             links: {
@@ -824,7 +840,7 @@
                             output += `  [${i + CONFIG.FREE_LINKS.length + 1}] ${link.name} - ${link.desc}\n`;
                         });
                     } else {
-                        output += "\n🔒 4 premium links locked. Upgrade to access.";
+                        output += "\n🔒 4 premium links locked. Use 'redeem' to upgrade.";
                     }
                     return output;
                 }
@@ -833,11 +849,52 @@
                 desc: "Cloak a URL (usage: cloak <url>)",
                 action: (args) => {
                     if (!args || args.length === 0) {
-                        return "Usage: cloak <url>";
+                        return "Usage: cloak <url>\nExample: cloak https://example.com";
                     }
                     const url = args.join(' ');
+                    if (!url.startsWith('http')) {
+                        return "Error: URL must start with http:// or https://";
+                    }
                     cloakOpen(url, 'Custom');
                     return `Cloaking ${url}...`;
+                }
+            },
+            redeem: {
+                desc: "Redeem premium key (usage: redeem <key>)",
+                action: (args) => {
+                    if (!args || args.length === 0) {
+                        return "Usage: redeem <key>\nUse 'redeem password' for master password auth";
+                    }
+                    const key = args.join(' ');
+                    
+                    if (key === 'password') {
+                        // Prompt for password
+                        setTimeout(() => {
+                            const pass = prompt('Enter master password:');
+                            if (pass === CONFIG.MASTER_PASSWORD) {
+                                upgradeToPremium('PASSWORD');
+                            } else {
+                                logToTerminal('Authentication failed: Invalid password', 'error');
+                            }
+                        }, 100);
+                        return "Prompting for password...";
+                    }
+                    
+                    if (CONFIG.VALID_KEYS.includes(key)) {
+                        upgradeToPremium(key);
+                        return `Key accepted! Upgrading to PREMIUM...`;
+                    } else {
+                        return "Error: Invalid key. Contact extinct for valid keys.";
+                    }
+                }
+            },
+            upgrade: {
+                desc: "Show upgrade options",
+                action: () => {
+                    if (isPremium) {
+                        return "You already have PREMIUM access!";
+                    }
+                    return "Upgrade options:\n  1. Use 'redeem <key>' with a valid key\n  2. Use 'redeem password' for master password\n\nContact extinct for premium keys.";
                 }
             },
             settings: {
@@ -848,16 +905,100 @@
                 }
             },
             logout: {
-                desc: "Logout and return to login",
+                desc: "Logout completely (resets session)",
                 action: () => {
-                    setTimeout(() => logout(), 500);
-                    return "Logging out...";
+                    setTimeout(() => fullLogout(), 500);
+                    return "Logging out completely...";
+                }
+            },
+            reload: {
+                desc: "Reload the page",
+                action: () => {
+                    setTimeout(() => location.reload(), 500);
+                    return "Reloading...";
+                }
+            },
+            status: {
+                desc: "Show system status",
+                action: () => {
+                    return `System Status:\n  User: ${username}\n  Tier: ${isPremium ? 'PREMIUM ✓' : 'FREE'}\n  Links: ${isPremium ? '6/6' : '2/6'}\n  Cloak: ${settings.autoCloak ? 'ACTIVE' : 'OFF'}\n  Cursor: ${settings.customCursor ? 'CUSTOM' : 'DEFAULT'}\n  Effects: ${settings.bgEffects ? 'ON' : 'OFF'}`;
+                }
+            },
+            echo: {
+                desc: "Echo text back (usage: echo <text>)",
+                action: (args) => {
+                    return args ? args.join(' ') : '';
+                }
+            },
+            calc: {
+                desc: "Simple calculator (usage: calc <expression>)",
+                action: (args) => {
+                    if (!args || args.length === 0) return "Usage: calc 2+2";
+                    try {
+                        const expr = args.join('');
+                        // Safe eval alternative
+                        const result = Function('"use strict"; return (' + expr + ')')();
+                        return `${expr} = ${result}`;
+                    } catch (e) {
+                        return "Error: Invalid expression";
+                    }
+                }
+            },
+            open: {
+                desc: "Open a link by number (usage: open <number>)",
+                action: (args) => {
+                    if (!args || args.length === 0) return "Usage: open 1";
+                    const num = parseInt(args[0]);
+                    if (isNaN(num)) return "Error: Please enter a number";
+                    
+                    const allLinks = [...CONFIG.FREE_LINKS, ...(isPremium ? CONFIG.PREMIUM_LINKS : [])];
+                    if (num < 1 || num > allLinks.length) {
+                        return `Error: Invalid link number. Use 'links' to see available options.`;
+                    }
+                    
+                    const link = allLinks[num - 1];
+                    if (!isPremium && num > CONFIG.FREE_LINKS.length) {
+                        return "🔒 This link requires PREMIUM. Use 'redeem' to upgrade.";
+                    }
+                    
+                    cloakOpen(link.url, link.name);
+                    return `Opening ${link.name}...`;
                 }
             },
             about: {
                 desc: "About anonyLoadr",
                 action: () => {
-                    return `anonyLoadr v2.0\nCreated by extinct\n\nA secure, anonymous browsing gateway with cloaking technology.\nAll connections are encrypted and masked for privacy.`;
+                    return `anonyLoadr v2.0\nCreated by extinct\n\nA secure, anonymous browsing gateway with cloaking technology.\nAll connections are encrypted and masked for privacy.\n\nFeatures:\n  • Auto-cloaked link opening\n  • Premium key system\n  • Interactive terminal\n  • Customizable settings\n  • Session persistence`;
+                }
+            },
+            version: {
+                desc: "Show version info",
+                action: () => {
+                    return "anonyLoadr v2.0.0 'Cyberpunk Edition'\nBuild: 2026.02.14\nAuthor: extinct";
+                }
+            },
+            hack: {
+                desc: "Fake hacking animation (just for fun)",
+                action: () => {
+                    setTimeout(() => {
+                        const lines = [
+                            "Initializing brute force...",
+                            "Bypassing firewall...",
+                            "Accessing mainframe...",
+                            "Downloading data...",
+                            "Just kidding! This is a legal tool :)"
+                        ];
+                        let i = 0;
+                        const interval = setInterval(() => {
+                            if (i < lines.length) {
+                                logToTerminal(lines[i], 'info');
+                                i++;
+                            } else {
+                                clearInterval(interval);
+                            }
+                        }, 800);
+                    }, 100);
+                    return "Initiating sequence...";
                 }
             }
         };
@@ -865,23 +1006,39 @@
         // Initialize
         window.onload = function() {
             loadSettings();
+            checkSession();
+        };
+
+        function checkSession() {
             const saved = localStorage.getItem('anonyLoadr_session');
             const hasSeenIntro = localStorage.getItem('anonyLoadr_intro_seen');
             
+            // Reset state
+            isPremium = false;
+            usedKey = null;
+            
             if (!hasSeenIntro) {
+                // Show intro first
                 document.getElementById('introModal').style.display = 'flex';
-            } else {
-                if (saved) {
-                    const session = JSON.parse(saved);
-                    username = session.username || 'User';
-                    if (session.isPremium) {
-                        isPremium = true;
-                        usedKey = session.usedKey;
-                    }
+                document.getElementById('loginModal').style.display = 'none';
+                document.getElementById('mainContent').style.display = 'none';
+            } else if (saved) {
+                // Has session, check if premium
+                const session = JSON.parse(saved);
+                username = session.username || 'User';
+                if (session.isPremium) {
+                    isPremium = true;
+                    usedKey = session.usedKey;
+                    showMainContent();
+                } else {
+                    // Free user, show login to upgrade option
+                    document.getElementById('loginModal').style.display = 'flex';
                 }
-                showMainContent();
+            } else {
+                // No session, show login
+                document.getElementById('loginModal').style.display = 'flex';
             }
-        };
+        }
 
         // Intro functions
         function nextIntroStep() {
@@ -907,11 +1064,15 @@
         function finishIntro() {
             localStorage.setItem('anonyLoadr_intro_seen', 'true');
             document.getElementById('introModal').style.display = 'none';
-            showMainContent();
+            
+            // After intro, show login modal (not main content directly)
+            document.getElementById('loginModal').style.display = 'flex';
         }
 
         function resetIntro() {
             localStorage.removeItem('anonyLoadr_intro_seen');
+            // Don't clear session, just redo intro
+            closeSettings();
             location.reload();
         }
 
@@ -922,23 +1083,12 @@
             const successMsg = document.getElementById('successMsg');
 
             if (input === CONFIG.MASTER_PASSWORD) {
-                isPremium = true;
-                usedKey = 'PASSWORD';
-                successMsg.style.display = 'block';
-                errorMsg.style.display = 'none';
-                saveSession();
-                setTimeout(showMainContent, 800);
+                upgradeToPremium('PASSWORD');
                 return;
             }
 
             if (CONFIG.VALID_KEYS.includes(input)) {
-                isPremium = true;
-                usedKey = input;
-                successMsg.textContent = 'Key accepted! Access granted!';
-                successMsg.style.display = 'block';
-                errorMsg.style.display = 'none';
-                saveSession();
-                setTimeout(showMainContent, 800);
+                upgradeToPremium(input);
                 return;
             }
 
@@ -946,9 +1096,25 @@
             successMsg.style.display = 'none';
         }
 
+        function upgradeToPremium(key) {
+            isPremium = true;
+            usedKey = key;
+            
+            const successMsg = document.getElementById('successMsg');
+            const errorMsg = document.getElementById('errorMsg');
+            
+            successMsg.textContent = 'Access granted! Loading...';
+            successMsg.style.display = 'block';
+            errorMsg.style.display = 'none';
+            
+            saveSession();
+            setTimeout(showMainContent, 800);
+        }
+
         function skipLogin() {
             isPremium = false;
             usedKey = null;
+            saveSession();
             showMainContent();
         }
 
@@ -961,13 +1127,39 @@
             }));
         }
 
-        function logout() {
+        // FULL LOGOUT - clears everything
+        function fullLogout() {
+            // Clear all stored data
             localStorage.removeItem('anonyLoadr_session');
-            location.reload();
+            localStorage.removeItem('anonyLoadr_intro_seen');
+            localStorage.removeItem('anonyLoadr_settings');
+            
+            // Reset state
+            isPremium = false;
+            usedKey = null;
+            username = 'User';
+            
+            // Hide all content
+            document.getElementById('mainContent').style.display = 'none';
+            document.getElementById('settingsModal').style.display = 'none';
+            
+            // Show intro first (then login)
+            document.getElementById('introModal').style.display = 'flex';
+            
+            // Reset intro steps
+            document.getElementById('step1').classList.add('active');
+            document.getElementById('step2').classList.remove('active');
+            document.getElementById('step3').classList.remove('active');
+            document.getElementById('usernameInput').value = '';
+        }
+
+        // Backward compatible logout (redirects to full logout)
+        function logout() {
+            fullLogout();
         }
 
         function clearAllData() {
-            if (confirm('Are you sure? This will reset everything including your username and settings.')) {
+            if (confirm('⚠ WARNING: This will erase EVERYTHING including username, settings, and session. Continue?')) {
                 localStorage.clear();
                 location.reload();
             }
@@ -987,7 +1179,9 @@
                 document.getElementById('accessLevel').textContent = 'Full access unlocked';
                 document.getElementById('userTier').textContent = 'PREMIUM';
             } else {
+                document.getElementById('userBadge').style.display = 'none';
                 document.getElementById('systemStatus').textContent = 'FREE_TIER';
+                document.getElementById('tierText').textContent = 'Free Gateway Protocol';
                 document.getElementById('userTier').textContent = 'GUEST';
             }
 
@@ -1001,7 +1195,7 @@
                 return;
             }
             
-            logToTerminal(`Cloaking ${name}...`);
+            logToTerminal(`Cloaking ${name}...`, 'info');
             
             const win = window.open('about:blank', '_blank');
             if (!win) {
@@ -1029,13 +1223,13 @@
             const saved = localStorage.getItem('anonyLoadr_settings');
             if (saved) {
                 settings = JSON.parse(saved);
-                document.getElementById('autoCloakToggle').checked = settings.autoCloak;
-                document.getElementById('cursorToggle').checked = settings.customCursor;
-                document.getElementById('effectsToggle').checked = settings.bgEffects;
-                document.getElementById('scanlinesToggle').checked = settings.scanlines;
-                document.getElementById('soundsToggle').checked = settings.terminalSounds;
             }
-            applySettings();
+            // Apply toggles
+            document.getElementById('autoCloakToggle').checked = settings.autoCloak;
+            document.getElementById('cursorToggle').checked = settings.customCursor;
+            document.getElementById('effectsToggle').checked = settings.bgEffects;
+            document.getElementById('scanlinesToggle').checked = settings.scanlines;
+            document.getElementById('soundsToggle').checked = settings.terminalSounds;
         }
 
         function saveSettings() {
@@ -1051,7 +1245,15 @@
         function applySettings() {
             // Cursor
             const cursors = document.querySelectorAll('.cursor, .cursor-follower');
-            cursors.forEach(c => c.style.display = settings.customCursor ? 'block' : 'none');
+            const body = document.body;
+            
+            if (settings.customCursor) {
+                body.classList.add('custom-cursor');
+                cursors.forEach(c => c.style.display = 'block');
+            } else {
+                body.classList.remove('custom-cursor');
+                cursors.forEach(c => c.style.display = 'none');
+            }
             
             // Background effects
             const particles = document.getElementById('particles');
@@ -1087,6 +1289,20 @@
                         this.value = '';
                     }
                 }
+                // Tab completion
+                if (e.key === 'Tab') {
+                    e.preventDefault();
+                    const partial = this.value.toLowerCase();
+                    const matches = Object.keys(COMMANDS).filter(cmd => cmd.startsWith(partial));
+                    if (matches.length === 1) {
+                        this.value = matches[0];
+                    }
+                }
+            });
+            
+            // Focus terminal when clicking anywhere in terminal container
+            document.querySelector('.terminal-container').addEventListener('click', () => {
+                input.focus();
             });
             
             input.focus();
@@ -1122,14 +1338,13 @@
                 output.appendChild(errorDiv);
             }
             
-            // Auto scroll
             output.scrollTop = output.scrollHeight;
         }
 
-        function logToTerminal(message) {
+        function logToTerminal(message, type = 'info') {
             const output = document.getElementById('terminalOutput');
             const line = document.createElement('div');
-            line.className = 'command-output command-info';
+            line.className = `command-output command-${type}`;
             line.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
             output.appendChild(line);
             output.scrollTop = output.scrollHeight;
@@ -1194,7 +1409,7 @@
                     e.preventDefault();
                     cloakOpen(link.url, link.name);
                 });
-                card.addEventListener('mouseenter', () => logToTerminal(`Preparing ${link.name}...`));
+                card.addEventListener('mouseenter', () => logToTerminal(`Preparing ${link.name}...`, 'info'));
             }
             
             grid.appendChild(card);
@@ -1216,10 +1431,23 @@
                 }, 100);
             });
 
-            document.querySelectorAll('a, button').forEach(el => {
+            // Add hover effect to all interactive elements
+            const interactiveElements = 'button, a, .link-card:not(.locked), input, .toggle-slider, .intro-btn, .login-btn, .skip-btn, .skip-intro';
+            document.querySelectorAll(interactiveElements).forEach(el => {
                 el.addEventListener('mouseenter', () => cursor.classList.add('hover'));
                 el.addEventListener('mouseleave', () => cursor.classList.remove('hover'));
             });
+            
+            // Re-apply when DOM changes
+            const observer = new MutationObserver(() => {
+                document.querySelectorAll(interactiveElements).forEach(el => {
+                    el.removeEventListener('mouseenter', () => cursor.classList.add('hover'));
+                    el.removeEventListener('mouseleave', () => cursor.classList.remove('hover'));
+                    el.addEventListener('mouseenter', () => cursor.classList.add('hover'));
+                    el.addEventListener('mouseleave', () => cursor.classList.remove('hover'));
+                });
+            });
+            observer.observe(document.body, { childList: true, subtree: true });
         }
 
         function initParticles() {
