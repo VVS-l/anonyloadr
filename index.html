@@ -1,10 +1,3 @@
-<script>
-    window.addEventListener('beforeunload', function (e) {
-        e.preventDefault();
-        e.returnValue = '';
-    });
-</script>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -517,25 +510,33 @@
         }
 
         // ==========================================
-        // CLOAKING FUNCTION - ALL LINKS USE THIS
+        // CLOAKING FUNCTION - NO REDIRECT, NO PROMPT
         // ==========================================
         
         function cloakOpen(url, name) {
-            logToTerminal(`Initiating cloak sequence for ${name}...`);
+            logToTerminal(`Opening ${name} in cloaked tab...`);
             
-            // Open cloaked window with target site
-            var win = window.open();
+            // Simply open about:blank with iframe - no redirect, no prompt
+            var win = window.open('about:blank', '_blank');
             if (!win) {
                 alert('Popup blocked! Allow popups for cloaking to work.');
                 return;
             }
             
             // Write iframe to new window
-            win.document.write(`<iframe src="${url}" style="width:100%;height:100vh;border:none;position:fixed;top:0;left:0;"></iframe>`);
-            win.document.body.style.margin = "0";
-            win.document.body.style.padding = "0";
-            win.document.body.style.overflow = "hidden";
-            
+            win.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>${name}</title>
+                    <style>body{margin:0;padding:0;overflow:hidden;}</style>
+                </head>
+                <body>
+                    <iframe src="${url}" style="width:100vw;height:100vh;border:none;position:fixed;top:0;left:0;"></iframe>
+                </body>
+                </html>
+            `);
+            win.document.close();
         }
 
         function initApp() {
@@ -586,7 +587,7 @@
                 <p class="text-sm ${locked ? 'text-gray-600' : 'text-gray-400 group-hover:text-gray-300'}">${locked ? '🔒 Upgrade to access' : link.desc}</p>
                 <div class="mt-4 flex items-center gap-2 text-xs ${locked ? 'text-gray-600' : 'text-white/20 group-hover:text-cyan-400/60'} transition-colors">
                     <span class="w-1.5 h-1.5 rounded-full bg-current ${locked ? '' : 'animate-pulse'}"></span>
-                    <span class="font-mono">${locked ? 'LOCKED' : 'AUTO_CLOAK'}</span>
+                    <span class="font-mono">${locked ? 'LOCKED' : 'CLOAKED'}</span>
                 </div>
             `;
             
@@ -595,7 +596,7 @@
                     e.preventDefault();
                     cloakOpen(link.url, link.name);
                 });
-                card.addEventListener('mouseenter', () => logToTerminal(`Preparing cloak for ${link.name}...`));
+                card.addEventListener('mouseenter', () => logToTerminal(`Preparing ${link.name}...`));
             }
             
             grid.appendChild(card);
@@ -652,8 +653,8 @@
             "Initializing secure connection...",
             isPremium ? "Premium credentials verified" : "Guest access granted (limited)",
             "Cloaking protocols activated",
-            "History spoofing enabled",
             "Tor circuit established",
+            "Encryption keys generated [RSA-4096]",
             "Ready for anonymous browsing"
         ];
 
