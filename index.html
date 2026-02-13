@@ -259,6 +259,11 @@
             border: 1px solid rgba(255, 255, 255, 0.2);
             margin-top: 10px;
         }
+        .enter-key-btn {
+            background: rgba(0, 240, 255, 0.1);
+            border: 1px solid var(--primary);
+            margin-top: 10px;
+        }
         .error-msg {
             color: #ff4444;
             font-size: 0.875rem;
@@ -565,6 +570,7 @@
             
             <input type="password" id="passwordInput" class="login-input" placeholder="Password or Key...">
             <button onclick="checkAuth()" class="login-btn">Unlock</button>
+            <button onclick="showKeyPrompt()" class="login-btn enter-key-btn">🔑 Enter Key</button>
             <button onclick="skipLogin()" class="login-btn skip-btn">Continue Free (Limited)</button>
             
             <div id="errorMsg" class="error-msg">Invalid password or key</div>
@@ -1023,20 +1029,19 @@
                 document.getElementById('loginModal').style.display = 'none';
                 document.getElementById('mainContent').style.display = 'none';
             } else if (saved) {
-                // Has session, check if premium
+                // Has session, restore it
                 const session = JSON.parse(saved);
                 username = session.username || 'User';
-                if (session.isPremium) {
-                    isPremium = true;
-                    usedKey = session.usedKey;
-                    showMainContent();
-                } else {
-                    // Free user, show login to upgrade option
-                    document.getElementById('loginModal').style.display = 'flex';
-                }
+                isPremium = session.isPremium || false;
+                usedKey = session.usedKey || null;
+                
+                // CRITICAL FIX: Always show main content for returning users with session
+                showMainContent();
             } else {
                 // No session, show login
                 document.getElementById('loginModal').style.display = 'flex';
+                document.getElementById('introModal').style.display = 'none';
+                document.getElementById('mainContent').style.display = 'none';
             }
         }
 
@@ -1096,6 +1101,15 @@
             successMsg.style.display = 'none';
         }
 
+        // NEW: Show key prompt button handler
+        function showKeyPrompt() {
+            const key = prompt('Enter your premium access key:');
+            if (key && key.trim()) {
+                document.getElementById('passwordInput').value = key.trim();
+                checkAuth();
+            }
+        }
+
         function upgradeToPremium(key) {
             isPremium = true;
             usedKey = key;
@@ -1108,7 +1122,26 @@
             errorMsg.style.display = 'none';
             
             saveSession();
-            setTimeout(showMainContent, 800);
+            
+            // CRITICAL FIX: Re-render links immediately to unlock premium content
+            renderLinks();
+            
+            // Update UI to show premium status
+            updatePremiumUI();
+            
+            setTimeout(() => {
+                document.getElementById('loginModal').style.display = 'none';
+                document.getElementById('mainContent').style.display = 'flex';
+                logToTerminal(`Premium activated with key: ${key}`, 'success');
+            }, 800);
+        }
+
+        // NEW: Update UI elements for premium status
+        function updatePremiumUI() {
+            document.getElementById('userBadge').style.display = isPremium ? 'inline-block' : 'none';
+            document.getElementById('systemStatus').textContent = isPremium ? 'PREMIUM_USER' : 'FREE_TIER';
+            document.getElementById('tierText').textContent = isPremium ? 'Premium Gateway Protocol' : 'Free Gateway Protocol';
+            document.getElementById('userTier').textContent = isPremium ? 'PREMIUM' : 'GUEST';
         }
 
         function skipLogin() {
@@ -1172,19 +1205,8 @@
             document.getElementById('userDisplayName').textContent = username;
             document.getElementById('greeting').textContent = `Hello, ${username}!`;
             
-            if (isPremium) {
-                document.getElementById('userBadge').style.display = 'inline-block';
-                document.getElementById('systemStatus').textContent = 'PREMIUM_USER';
-                document.getElementById('tierText').textContent = 'Premium Gateway Protocol';
-                document.getElementById('accessLevel').textContent = 'Full access unlocked';
-                document.getElementById('userTier').textContent = 'PREMIUM';
-            } else {
-                document.getElementById('userBadge').style.display = 'none';
-                document.getElementById('systemStatus').textContent = 'FREE_TIER';
-                document.getElementById('tierText').textContent = 'Free Gateway Protocol';
-                document.getElementById('userTier').textContent = 'GUEST';
-            }
-
+            updatePremiumUI();
+            
             initApp();
         }
 
@@ -1432,7 +1454,7 @@
             });
 
             // Add hover effect to all interactive elements
-            const interactiveElements = 'button, a, .link-card:not(.locked), input, .toggle-slider, .intro-btn, .login-btn, .skip-btn, .skip-intro';
+            const interactiveElements = 'button, a, .link-card:not(.locked), input, .toggle-slider, .intro-btn, .login-btn, .skip-btn, .skip-intro, .enter-key-btn';
             document.querySelectorAll(interactiveElements).forEach(el => {
                 el.addEventListener('mouseenter', () => cursor.classList.add('hover'));
                 el.addEventListener('mouseleave', () => cursor.classList.remove('hover'));
