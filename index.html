@@ -4,6 +4,8 @@
         e.returnValue = '';
     });
 </script>
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -19,11 +21,7 @@
             --surface: #0a0a0a;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             font-family: 'Space Grotesk', sans-serif;
@@ -36,8 +34,7 @@
 
         /* Custom Cursor */
         .cursor {
-            width: 20px;
-            height: 20px;
+            width: 20px; height: 20px;
             border: 2px solid var(--primary);
             border-radius: 50%;
             position: fixed;
@@ -46,10 +43,8 @@
             transition: transform 0.1s ease, background 0.2s ease;
             mix-blend-mode: difference;
         }
-
         .cursor-follower {
-            width: 40px;
-            height: 40px;
+            width: 40px; height: 40px;
             background: rgba(0, 240, 255, 0.1);
             border-radius: 50%;
             position: fixed;
@@ -57,82 +52,49 @@
             z-index: 9998;
             transition: transform 0.3s ease-out;
         }
+        .cursor.hover { transform: scale(2); background: var(--primary); }
 
-        .cursor.hover {
-            transform: scale(2);
-            background: var(--primary);
-        }
-
-        /* Animated Background */
+        /* Background Effects */
         .bg-animation {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
             background: 
                 radial-gradient(circle at 20% 50%, rgba(112, 0, 255, 0.15) 0%, transparent 50%),
                 radial-gradient(circle at 80% 80%, rgba(0, 240, 255, 0.1) 0%, transparent 50%),
                 radial-gradient(circle at 40% 20%, rgba(112, 0, 255, 0.1) 0%, transparent 50%);
             animation: bgPulse 10s ease-in-out infinite;
         }
-
         @keyframes bgPulse {
             0%, 100% { opacity: 0.5; transform: scale(1); }
             50% { opacity: 1; transform: scale(1.1); }
         }
 
-        /* Grid Lines */
         .grid-lines {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
             background-image: 
                 linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
                 linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
             background-size: 50px 50px;
-            z-index: -1;
-            perspective: 1000px;
-            transform-style: preserve-3d;
             animation: gridMove 20s linear infinite;
         }
-
         @keyframes gridMove {
             0% { transform: translateY(0); }
             100% { transform: translateY(50px); }
         }
 
         /* Glitch Effect */
-        .glitch {
-            position: relative;
-            display: inline-block;
-        }
-
-        .glitch::before,
-        .glitch::after {
+        .glitch { position: relative; display: inline-block; }
+        .glitch::before, .glitch::after {
             content: attr(data-text);
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
         }
-
         .glitch::before {
             animation: glitch-1 2s infinite linear alternate-reverse;
-            color: #ff00ff;
-            z-index: -1;
+            color: #ff00ff; z-index: -1;
         }
-
         .glitch::after {
             animation: glitch-2 3s infinite linear alternate-reverse;
-            color: #00ffff;
-            z-index: -2;
+            color: #00ffff; z-index: -2;
         }
-
         @keyframes glitch-1 {
             0%, 100% { clip-path: inset(0 0 0 0); transform: translate(0); }
             20% { clip-path: inset(20% 0 30% 0); transform: translate(-2px, 2px); }
@@ -140,7 +102,6 @@
             60% { clip-path: inset(10% 0 60% 0); transform: translate(-2px, 0); }
             80% { clip-path: inset(80% 0 5% 0); transform: translate(2px, 2px); }
         }
-
         @keyframes glitch-2 {
             0%, 100% { clip-path: inset(0 0 0 0); transform: translate(0); }
             20% { clip-path: inset(60% 0 10% 0); transform: translate(2px, -2px); }
@@ -158,66 +119,62 @@
             position: relative;
             overflow: hidden;
         }
-
         .link-card::before {
             content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
+            position: absolute; top: 0; left: -100%;
+            width: 100%; height: 100%;
             background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
             transition: left 0.5s;
         }
-
-        .link-card:hover::before {
-            left: 100%;
-        }
-
+        .link-card:hover::before { left: 100%; }
         .link-card:hover {
             transform: translateY(-5px) scale(1.02);
             border-color: var(--primary);
             box-shadow: 0 10px 40px -10px rgba(0, 240, 255, 0.3);
         }
-
         .link-card:hover .icon-wrapper {
             transform: rotate(360deg) scale(1.1);
             color: var(--primary);
         }
+        .icon-wrapper { transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
 
-        .icon-wrapper {
-            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        /* Locked Card Style */
+        .link-card.locked {
+            opacity: 0.5;
+            cursor: not-allowed;
+            position: relative;
+        }
+        .link-card.locked::after {
+            content: '🔒 PREMIUM';
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            color: var(--primary);
+            border: 1px solid var(--primary);
         }
 
-        /* Scanline Effect */
         .scanlines {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(
-                to bottom,
-                transparent 50%,
-                rgba(0, 0, 0, 0.1) 50%
-            );
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(to bottom, transparent 50%, rgba(0, 0, 0, 0.1) 50%);
             background-size: 100% 4px;
             pointer-events: none;
             z-index: 9999;
             opacity: 0.3;
         }
 
-        /* Floating Particles */
         .particle {
             position: absolute;
-            width: 4px;
-            height: 4px;
+            width: 4px; height: 4px;
             background: var(--primary);
             border-radius: 50%;
             opacity: 0.5;
             animation: float 15s infinite;
         }
-
         @keyframes float {
             0%, 100% { transform: translateY(0) translateX(0); opacity: 0; }
             10% { opacity: 1; }
@@ -225,51 +182,142 @@
             100% { transform: translateY(-100vh) translateX(100px); opacity: 0; }
         }
 
-        /* Status Bar */
         .status-bar {
             font-family: 'Courier New', monospace;
             font-size: 0.75rem;
             color: rgba(255, 255, 255, 0.5);
         }
-
-        .status-dot {
-            animation: pulse 2s infinite;
-        }
-
+        .status-dot { animation: pulse 2s infinite; }
         @keyframes pulse {
             0%, 100% { opacity: 1; }
             50% { opacity: 0.3; }
         }
 
-        /* Scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
+        ::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
 
-        ::-webkit-scrollbar-track {
-            background: var(--bg);
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: var(--primary);
-            border-radius: 4px;
-        }
-
-        /* Loading Animation */
         .loading-bar {
-            width: 0%;
-            height: 2px;
+            width: 0%; height: 2px;
             background: linear-gradient(90deg, var(--primary), var(--secondary));
             transition: width 0.3s ease;
         }
-
         .link-card:hover .loading-bar {
             width: 100%;
             transition: width 1s ease;
         }
+
+        /* Login Modal */
+        #loginModal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(10px);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .login-box {
+            background: var(--surface);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 40px;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+        }
+        .login-input {
+            width: 100%;
+            padding: 12px 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: white;
+            margin: 10px 0;
+            font-family: 'Space Grotesk', sans-serif;
+        }
+        .login-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        .login-btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: opacity 0.3s;
+        }
+        .login-btn:hover { opacity: 0.9; }
+        .skip-btn {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            margin-top: 10px;
+        }
+        .error-msg {
+            color: #ff4444;
+            font-size: 0.875rem;
+            margin-top: 10px;
+            display: none;
+        }
+        .success-msg {
+            color: #00ff88;
+            font-size: 0.875rem;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .premium-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        
+        .cloak-indicator {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 0.7rem;
+            color: var(--primary);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .link-card:hover .cloak-indicator {
+            opacity: 1;
+        }
     </style>
 </head>
 <body class="antialiased selection:bg-cyan-500 selection:text-black">
+
+    <!-- Login Modal -->
+    <div id="loginModal">
+        <div class="login-box">
+            <div class="w-3 h-3 bg-cyan-400 rounded-full animate-pulse shadow-[0_0_10px_#00f0ff] mx-auto mb-4"></div>
+            <h2 class="text-2xl font-bold mb-2 glitch" data-text="anonyLoadr">anonyLoadr</h2>
+            <p class="text-gray-400 text-sm mb-6">Enter password or access key to unlock premium content</p>
+            
+            <input type="password" id="passwordInput" class="login-input" placeholder="Password or Key...">
+            <button onclick="checkAuth()" class="login-btn">Unlock</button>
+            <button onclick="skipLogin()" class="login-btn skip-btn">Continue Free (Limited)</button>
+            
+            <div id="errorMsg" class="error-msg">Invalid password or key</div>
+            <div id="successMsg" class="success-msg">Access granted! Loading...</div>
+            
+            <div class="mt-6 text-xs text-gray-500">
+                <p>Free: 2 websites | Premium: All 6 websites + Vapor V4</p>
+            </div>
+        </div>
+    </div>
+
     <!-- Custom Cursor -->
     <div class="cursor hidden md:block"></div>
     <div class="cursor-follower hidden md:block"></div>
@@ -278,12 +326,10 @@
     <div class="bg-animation"></div>
     <div class="grid-lines"></div>
     <div class="scanlines"></div>
-
-    <!-- Floating Particles Container -->
     <div id="particles" class="fixed inset-0 pointer-events-none"></div>
 
     <!-- Main Content -->
-    <div class="relative z-10 min-h-screen flex flex-col">
+    <div class="relative z-10 min-h-screen flex flex-col" id="mainContent" style="display: none;">
         
         <!-- Header -->
         <header class="p-6 md:p-10 flex justify-between items-center border-b border-white/10 backdrop-blur-sm">
@@ -292,28 +338,30 @@
                 <h1 class="text-2xl md:text-4xl font-bold tracking-tighter glitch" data-text="anonyLoadr">
                     anonyLoadr
                 </h1>
+                <span id="userBadge" class="premium-badge" style="display: none;">PREMIUM</span>
             </div>
-            <div class="status-bar hidden md:block">
-                <span class="status-dot text-green-400">●</span> SYSTEM_ONLINE // v2.0.4
+            <div class="flex items-center gap-4">
+                <button onclick="logout()" class="text-xs text-gray-400 hover:text-white transition">Logout</button>
+                <div class="status-bar hidden md:block">
+                    <span class="status-dot text-green-400">●</span> <span id="systemStatus">FREE_TIER</span>
+                </div>
             </div>
         </header>
 
         <!-- Main Grid -->
         <main class="flex-1 p-6 md:p-10 max-w-7xl mx-auto w-full">
             
-            <!-- Hero Text -->
             <div class="mb-12 text-center md:text-left">
-                <p class="text-gray-400 text-sm md:text-base tracking-widest uppercase mb-2">Secure Gateway Protocol</p>
+                <p class="text-gray-400 text-sm md:text-base tracking-widest uppercase mb-2" id="tierText">Free Gateway Protocol</p>
                 <h2 class="text-3xl md:text-5xl font-light leading-tight">
                     Access the <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-500 font-bold">network</span><br>
-                    without traces
+                    <span id="accessLevel">Limited access mode</span>
                 </h2>
+                <p class="text-cyan-400/60 text-sm mt-2 font-mono">All links auto-cloak on open</p>
             </div>
 
             <!-- Links Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="linksGrid">
-                <!-- Cards will be injected here by JavaScript -->
-            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="linksGrid"></div>
 
             <!-- Terminal Output -->
             <div class="mt-12 p-4 bg-black/50 border border-white/10 rounded font-mono text-xs text-green-400/80 h-32 overflow-hidden relative">
@@ -324,99 +372,237 @@
 
         <!-- Footer -->
         <footer class="p-6 text-center text-white/30 text-xs border-t border-white/10 backdrop-blur-sm">
-            <p>ENCRYPTED CONNECTION // TOR_NODE_ACTIVE // <span id="clock">00:00:00</span></p>
+            <p>ENCRYPTED CONNECTION // <span id="userTier">GUEST</span> // <span id="clock">00:00:00</span></p>
         </footer>
     </div>
 
     <script>
-        // Links Data
-        const links = [
-            {
-                name: "Vapor V4",
-                url: "https://wildcard.vaporized.help/",
-                desc: "G@ME$, M0VI3S, S3ARCH.",
-                icon: `<svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>`,
-                color: "from-gray-700 to-gray-900"
-            },
-            {
-                name: "Stack Overflow",
-                url: "https://stackoverflow.com",
-                desc: "Developer Q&A community",
-                icon: `<svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M15.725 0l-1.72 1.277 6.39 8.588 1.72-1.277L15.725 0zm-3.94 3.418l-1.369 1.644 8.225 6.85 1.369-1.644-8.225-6.85zm-3.15 4.465l-.905 1.94 9.702 4.517.904-1.94-9.701-4.517zm-1.85 4.86l-.44 2.093 10.473 2.201.44-2.092-10.473-2.203zM1.89 15.47V24h19.19v-8.53h-2.133v6.397H4.021v-6.396H1.89zm4.265 2.133v2.13h10.66v-2.13H6.154z"/></svg>`,
-                color: "from-orange-600 to-orange-800"
-            },
-            {
-                name: "Hacker News",
-                url: "https://news.ycombinator.com",
-                desc: "Tech news aggregator",
-                icon: `<svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M0 0v24h24V0H0zm12.5 17.5L7.5 9h3V5h2v4h3l-5 8.5z"/></svg>`,
-                color: "from-orange-500 to-red-600"
-            },
-            {
-                name: "Product Hunt",
-                url: "https://producthunt.com",
-                desc: "New tech products & apps",
-                icon: `<svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M13.604 8.4h-3.405V12h3.405c.996 0 1.8-.804 1.8-1.8s-.804-1.8-1.8-1.8zM12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm0 19.2c-3.976 0-7.2-3.224-7.2-7.2S8.024 4.8 12 4.8s7.2 3.224 7.2 7.2-3.224 7.2-7.2 7.2z"/></svg>`,
-                color: "from-red-500 to-pink-600"
-            },
-            {
-                name: "DuckDuckGo",
-                url: "https://duckduckgo.com",
-                desc: "Privacy-focused search",
-                icon: `<svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm0 2c5.514 0 10 4.486 10 10s-4.486 10-10 10S2 17.514 2 12 6.486 2 12 2zm-1.5 5v4.5H9v2h1.5V18h2v-4.5H14v-2h-1.5V7h-2z"/></svg>`,
-                color: "from-green-500 to-teal-600"
-            },
-            {
-                name: "Internet Archive",
-                url: "https://archive.org",
-                desc: "Digital library & wayback",
-                icon: `<svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>`,
-                color: "from-amber-600 to-yellow-700"
-            }
-        ];
+        // ==========================================
+        // CONFIGURATION
+        // ==========================================
+        
+        const CONFIG = {
+            MASTER_PASSWORD: "Lala2026!?",
+            
+            VALID_KEYS: [
+                "KEY-2026-001",
+                "KEY-2026-002", 
+                "VIP-USER-001",
+                "VIP-USER-002"
+            ],
+            
+            FREE_LINKS: [
+                {
+                    name: "Velara",
+                    url: "https://quick-help.math.alfa-ingegneria.it/g",
+                    desc: "Bunch of games hehe",
+                    icon: `<svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm0 2c5.514 0 10 4.486 10 10s-4.486 10-10 10S2 17.514 2 12 6.486 2 12 2zm-1.5 5v4.5H9v2h1.5V18h2v-4.5H14v-2h-1.5V7h-2z"/></svg>`
+                },
+                {
+                    name: "DogeUB",
+                    url: "https://file.vise.best/",
+                    desc: "Browser | hey, it works.",
+                    icon: `<svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>`
+                }
+            ],
+            
+            PREMIUM_LINKS: [
+                {
+                    name: "Vapor V4",
+                    url: "https://wildcard.vaporized.help/",
+                    desc: "G@ME$, M0VI3S, S3ARCH.",
+                    icon: `<svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>`
+                },
+                {
+                    name: "Art Class",
+                    url: "https://anonyv4.vercel.app/",
+                    desc: "Some games/apps work :3",
+                    icon: `<svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M15.725 0l-1.72 1.277 6.39 8.588 1.72-1.277L15.725 0zm-3.94 3.418l-1.369 1.644 8.225 6.85 1.369-1.644-8.225-6.85zm-3.15 4.465l-.905 1.94 9.702 4.517.904-1.94-9.701-4.517zm-1.85 4.86l-.44 2.093 10.473 2.201.44-2.092-10.473-2.203zM1.89 15.47V24h19.19v-8.53h-2.133v6.397H4.021v-6.396H1.89zm4.265 2.133v2.13h10.66v-2.13H6.154z"/></svg>`
+                },
+                {
+                    name: "Lunar V2",
+                    url: "https://grade-checker.dinprima.ro/",
+                    desc: "Clean, private browsing experience.",
+                    icon: `<svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M0 0v24h24V0H0zm12.5 17.5L7.5 9h3V5h2v4h3l-5 8.5z"/></svg>`
+                },
+                {
+                    name: "Intersteller",
+                    url: "https://vcsa.notredameparish.ca/",
+                    desc: "OG LMFAO",
+                    icon: `<svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M13.604 8.4h-3.405V12h3.405c.996 0 1.8-.804 1.8-1.8s-.804-1.8-1.8-1.8zM12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm0 19.2c-3.976 0-7.2-3.224-7.2-7.2S8.024 4.8 12 4.8s7.2 3.224 7.2 7.2-3.224 7.2-7.2 7.2z"/></svg>`
+                }
+            ]
+        };
 
-        // Initialize
-        document.addEventListener('DOMContentLoaded', () => {
+        let isPremium = false;
+        let usedKey = null;
+
+        window.onload = function() {
+            const saved = localStorage.getItem('anonyLoadr_session');
+            if (saved) {
+                const session = JSON.parse(saved);
+                if (session.isPremium) {
+                    isPremium = true;
+                    usedKey = session.usedKey;
+                    showMainContent();
+                }
+            }
+        };
+
+        function checkAuth() {
+            const input = document.getElementById('passwordInput').value.trim();
+            const errorMsg = document.getElementById('errorMsg');
+            const successMsg = document.getElementById('successMsg');
+
+            if (input === CONFIG.MASTER_PASSWORD) {
+                isPremium = true;
+                usedKey = 'PASSWORD';
+                successMsg.style.display = 'block';
+                errorMsg.style.display = 'none';
+                saveSession();
+                setTimeout(showMainContent, 800);
+                return;
+            }
+
+            if (CONFIG.VALID_KEYS.includes(input)) {
+                isPremium = true;
+                usedKey = input;
+                successMsg.textContent = 'Key accepted! Access granted!';
+                successMsg.style.display = 'block';
+                errorMsg.style.display = 'none';
+                saveSession();
+                setTimeout(showMainContent, 800);
+                return;
+            }
+
+            errorMsg.style.display = 'block';
+            successMsg.style.display = 'none';
+        }
+
+        function skipLogin() {
+            isPremium = false;
+            usedKey = null;
+            showMainContent();
+        }
+
+        function saveSession() {
+            localStorage.setItem('anonyLoadr_session', JSON.stringify({
+                isPremium: isPremium,
+                usedKey: usedKey,
+                timestamp: Date.now()
+            }));
+        }
+
+        function logout() {
+            localStorage.removeItem('anonyLoadr_session');
+            location.reload();
+        }
+
+        function showMainContent() {
+            document.getElementById('loginModal').style.display = 'none';
+            document.getElementById('mainContent').style.display = 'flex';
+            
+            if (isPremium) {
+                document.getElementById('userBadge').style.display = 'inline-block';
+                document.getElementById('systemStatus').textContent = 'PREMIUM_USER';
+                document.getElementById('tierText').textContent = 'Premium Gateway Protocol';
+                document.getElementById('accessLevel').textContent = 'Full access unlocked';
+                document.getElementById('userTier').textContent = 'PREMIUM';
+            } else {
+                document.getElementById('systemStatus').textContent = 'FREE_TIER';
+                document.getElementById('userTier').textContent = 'GUEST';
+            }
+
+            initApp();
+        }
+
+        // ==========================================
+        // CLOAKING FUNCTION - ALL LINKS USE THIS
+        // ==========================================
+        
+        function cloakOpen(url, name) {
+            logToTerminal(`Initiating cloak sequence for ${name}...`);
+            
+            // Open cloaked window with target site
+            var win = window.open();
+            if (!win) {
+                alert('Popup blocked! Allow popups for cloaking to work.');
+                return;
+            }
+            
+            // Write iframe to new window
+            win.document.write(`<iframe src="${url}" style="width:100%;height:100vh;border:none;position:fixed;top:0;left:0;"></iframe>`);
+            win.document.body.style.margin = "0";
+            win.document.body.style.padding = "0";
+            win.document.body.style.overflow = "hidden";
+            
+            // Replace current page with Google (hides anonyLoadr from history)
+            window.location.replace("https://google.com");
+        }
+
+        function initApp() {
             renderLinks();
             initCursor();
             initParticles();
             startClock();
             startTerminal();
-        });
-
-        // Render Links
-        function renderLinks() {
-            const grid = document.getElementById('linksGrid');
-            links.forEach((link, index) => {
-                const card = document.createElement('a');
-                card.href = link.url;
-                card.target = "_blank";
-                card.className = 'link-card group block p-6 rounded-xl cursor-pointer';
-                card.style.animationDelay = `${index * 0.1}s`;
-                card.innerHTML = `
-                    <div class="loading-bar absolute bottom-0 left-0"></div>
-                    <div class="flex items-start justify-between mb-4">
-                        <div class="icon-wrapper text-white/70 group-hover:text-cyan-400">
-                            ${link.icon}
-                        </div>
-                        <div class="text-xs text-white/30 font-mono group-hover:text-cyan-400/70 transition-colors">
-                            [${String(index + 1).padStart(2, '0')}]
-                        </div>
-                    </div>
-                    <h3 class="text-xl font-bold mb-2 group-hover:text-cyan-400 transition-colors">${link.name}</h3>
-                    <p class="text-sm text-gray-400 group-hover:text-gray-300">${link.desc}</p>
-                    <div class="mt-4 flex items-center gap-2 text-xs text-white/20 group-hover:text-cyan-400/60 transition-colors">
-                        <span class="w-1.5 h-1.5 rounded-full bg-current animate-pulse"></span>
-                        <span class="font-mono">SECURE_CONNECTION</span>
-                    </div>
-                `;
-                
-                card.addEventListener('mouseenter', () => logToTerminal(`Accessing ${link.name}...`));
-                grid.appendChild(card);
-            });
         }
 
-        // Custom Cursor
+        function renderLinks() {
+            const grid = document.getElementById('linksGrid');
+            grid.innerHTML = '';
+
+            CONFIG.FREE_LINKS.forEach((link, index) => {
+                createCard(link, index, false);
+            });
+
+            if (isPremium) {
+                CONFIG.PREMIUM_LINKS.forEach((link, index) => {
+                    createCard(link, index + CONFIG.FREE_LINKS.length, false);
+                });
+            } else {
+                CONFIG.PREMIUM_LINKS.forEach((link, index) => {
+                    createCard(link, index + CONFIG.FREE_LINKS.length, true);
+                });
+            }
+        }
+
+        function createCard(link, index, locked) {
+            const grid = document.getElementById('linksGrid');
+            const card = document.createElement('div');
+            
+            card.className = `link-card group block p-6 rounded-xl ${locked ? 'locked' : 'cursor-pointer'}`;
+            
+            card.innerHTML = `
+                <div class="loading-bar absolute bottom-0 left-0"></div>
+                <span class="cloak-indicator">CLOAKED</span>
+                <div class="flex items-start justify-between mb-4">
+                    <div class="icon-wrapper text-white/70 ${locked ? '' : 'group-hover:text-cyan-400'}">
+                        ${link.icon}
+                    </div>
+                    <div class="text-xs text-white/30 font-mono ${locked ? '' : 'group-hover:text-cyan-400/70'} transition-colors">
+                        [${String(index + 1).padStart(2, '0')}]
+                    </div>
+                </div>
+                <h3 class="text-xl font-bold mb-2 ${locked ? 'text-gray-500' : 'group-hover:text-cyan-400'} transition-colors">${link.name}</h3>
+                <p class="text-sm ${locked ? 'text-gray-600' : 'text-gray-400 group-hover:text-gray-300'}">${locked ? '🔒 Upgrade to access' : link.desc}</p>
+                <div class="mt-4 flex items-center gap-2 text-xs ${locked ? 'text-gray-600' : 'text-white/20 group-hover:text-cyan-400/60'} transition-colors">
+                    <span class="w-1.5 h-1.5 rounded-full bg-current ${locked ? '' : 'animate-pulse'}"></span>
+                    <span class="font-mono">${locked ? 'LOCKED' : 'AUTO_CLOAK'}</span>
+                </div>
+            `;
+            
+            if (!locked) {
+                card.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    cloakOpen(link.url, link.name);
+                });
+                card.addEventListener('mouseenter', () => logToTerminal(`Preparing cloak for ${link.name}...`));
+            }
+            
+            grid.appendChild(card);
+        }
+
         function initCursor() {
             const cursor = document.querySelector('.cursor');
             const follower = document.querySelector('.cursor-follower');
@@ -439,7 +625,6 @@
             });
         }
 
-        // Floating Particles
         function initParticles() {
             const container = document.getElementById('particles');
             for (let i = 0; i < 20; i++) {
@@ -452,7 +637,6 @@
             }
         }
 
-        // Clock
         function startClock() {
             const clock = document.getElementById('clock');
             setInterval(() => {
@@ -466,12 +650,12 @@
             }, 1000);
         }
 
-        // Terminal
         const terminalLines = [
             "Initializing secure connection...",
+            isPremium ? "Premium credentials verified" : "Guest access granted (limited)",
+            "Cloaking protocols activated",
+            "History spoofing enabled",
             "Tor circuit established",
-            "Encryption keys generated [RSA-4096]",
-            "Proxy chains activated",
             "Ready for anonymous browsing"
         ];
 
@@ -508,23 +692,14 @@
             terminal.appendChild(line);
             terminal.scrollTop = terminal.scrollHeight;
             
-            // Keep only last 10 lines
             while (terminal.children.length > 10) {
                 terminal.removeChild(terminal.firstChild);
             }
         }
 
-        // Random glitch effect on title
-        setInterval(() => {
-            const glitch = document.querySelector('.glitch');
-            if (Math.random() > 0.95) {
-                glitch.style.animation = 'none';
-                setTimeout(() => {
-                    glitch.style.animation = '';
-                }, 100);
-            }
-        }, 2000);
+        document.getElementById('passwordInput')?.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') checkAuth();
+        });
     </script>
 </body>
 </html>
-
