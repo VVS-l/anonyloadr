@@ -5,13 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>anonyLoadr</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary: #00f0ff;
             --secondary: #7000ff;
+            --accent: #ff00a0;
             --bg: #050505;
             --surface: #0a0a0a;
+            --success: #00ff88;
+            --warning: #ffaa00;
+            --error: #ff4444;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -24,10 +28,7 @@
             overflow-x: hidden;
         }
 
-        /* Default cursor - always visible */
-        body.custom-cursor {
-            cursor: none;
-        }
+        body.custom-cursor { cursor: none; }
 
         /* Custom Cursor */
         .cursor {
@@ -49,10 +50,7 @@
             z-index: 99998;
             transition: transform 0.3s ease-out;
         }
-        .cursor.hover {
-            transform: scale(2);
-            background: var(--primary);
-        }
+        .cursor.hover { transform: scale(2); background: var(--primary); }
 
         /* Background Effects */
         .bg-animation {
@@ -60,7 +58,7 @@
             background: 
                 radial-gradient(circle at 20% 50%, rgba(112, 0, 255, 0.15) 0%, transparent 50%),
                 radial-gradient(circle at 80% 80%, rgba(0, 240, 255, 0.1) 0%, transparent 50%),
-                radial-gradient(circle at 40% 20%, rgba(112, 0, 255, 0.1) 0%, transparent 50%);
+                radial-gradient(circle at 40% 20%, rgba(255, 0, 160, 0.1) 0%, transparent 50%);
             animation: bgPulse 10s ease-in-out infinite;
         }
         @keyframes bgPulse {
@@ -89,11 +87,11 @@
         }
         .glitch::before {
             animation: glitch-1 2s infinite linear alternate-reverse;
-            color: #ff00ff; z-index: -1;
+            color: var(--accent); z-index: -1;
         }
         .glitch::after {
             animation: glitch-2 3s infinite linear alternate-reverse;
-            color: #00ffff; z-index: -2;
+            color: var(--primary); z-index: -2;
         }
         @keyframes glitch-1 {
             0%, 100% { clip-path: inset(0 0 0 0); transform: translate(0); }
@@ -110,7 +108,7 @@
             80% { clip-path: inset(40% 0 30% 0); transform: translate(-2px, -2px); }
         }
 
-        /* Card Styles */
+        /* Enhanced Card Styles */
         .link-card {
             background: rgba(255, 255, 255, 0.02);
             backdrop-filter: blur(10px);
@@ -158,6 +156,22 @@
             border: 1px solid var(--primary);
         }
 
+        /* Slot Card Styles */
+        .slot-card {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.05) 0%, rgba(112, 0, 255, 0.05) 100%);
+            border: 2px dashed rgba(0, 240, 255, 0.3);
+            transition: all 0.3s ease;
+        }
+        .slot-card:hover {
+            border-color: var(--primary);
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.1) 0%, rgba(112, 0, 255, 0.1) 100%);
+        }
+        .slot-card.occupied {
+            border-style: solid;
+            border-color: var(--success);
+            background: rgba(0, 255, 136, 0.05);
+        }
+
         .scanlines {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: linear-gradient(to bottom, transparent 50%, rgba(0, 0, 0, 0.1) 50%);
@@ -183,7 +197,7 @@
         }
 
         .status-bar {
-            font-family: 'Courier New', monospace;
+            font-family: 'JetBrains Mono', monospace;
             font-size: 0.75rem;
             color: rgba(255, 255, 255, 0.5);
         }
@@ -193,9 +207,10 @@
             50% { opacity: 0.3; }
         }
 
-        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: var(--bg); }
         ::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
+        ::-webkit-scrollbar-corner { background: var(--bg); }
 
         .loading-bar {
             width: 0%; height: 2px;
@@ -207,8 +222,8 @@
             transition: width 1s ease;
         }
 
-        /* Login Modal */
-        #loginModal {
+        /* Modal Styles */
+        .modal-overlay {
             position: fixed;
             inset: 0;
             background: rgba(0, 0, 0, 0.9);
@@ -217,8 +232,13 @@
             display: none;
             align-items: center;
             justify-content: center;
+            animation: fadeIn 0.3s ease;
         }
-        .login-box {
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .modal-box {
             background: var(--surface);
             border: 1px solid rgba(255, 255, 255, 0.1);
             padding: 40px;
@@ -226,8 +246,13 @@
             width: 90%;
             max-width: 400px;
             text-align: center;
+            animation: slideUp 0.3s ease;
         }
-        .login-input {
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .modal-input {
             width: 100%;
             padding: 12px 16px;
             background: rgba(255, 255, 255, 0.05);
@@ -236,12 +261,13 @@
             color: white;
             margin: 10px 0;
             font-family: 'Space Grotesk', sans-serif;
+            transition: border-color 0.3s;
         }
-        .login-input:focus {
+        .modal-input:focus {
             outline: none;
             border-color: var(--primary);
         }
-        .login-btn {
+        .modal-btn {
             width: 100%;
             padding: 12px;
             background: linear-gradient(90deg, var(--primary), var(--secondary));
@@ -251,31 +277,18 @@
             font-weight: bold;
             cursor: pointer;
             margin-top: 10px;
-            transition: opacity 0.3s;
+            transition: all 0.3s;
         }
-        .login-btn:hover { opacity: 0.9; }
-        .skip-btn {
+        .modal-btn:hover { opacity: 0.9; transform: translateY(-2px); }
+        .modal-btn.secondary {
             background: transparent;
             border: 1px solid rgba(255, 255, 255, 0.2);
-            margin-top: 10px;
         }
-        .enter-key-btn {
-            background: rgba(0, 240, 255, 0.1);
-            border: 1px solid var(--primary);
-            margin-top: 10px;
+        .modal-btn.accent {
+            background: linear-gradient(90deg, var(--accent), var(--secondary));
         }
-        .error-msg {
-            color: #ff4444;
-            font-size: 0.875rem;
-            margin-top: 10px;
-            display: none;
-        }
-        .success-msg {
-            color: #00ff88;
-            font-size: 0.875rem;
-            margin-top: 10px;
-            display: none;
-        }
+        .error-msg { color: var(--error); font-size: 0.875rem; margin-top: 10px; display: none; }
+        .success-msg { color: var(--success); font-size: 0.875rem; margin-top: 10px; display: none; }
 
         .premium-badge {
             display: inline-block;
@@ -285,6 +298,11 @@
             font-size: 0.75rem;
             font-weight: bold;
             margin-left: 10px;
+            animation: shimmer 2s infinite;
+        }
+        @keyframes shimmer {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
         }
         
         .cloak-indicator {
@@ -296,9 +314,7 @@
             opacity: 0;
             transition: opacity 0.3s;
         }
-        .link-card:hover .cloak-indicator {
-            opacity: 1;
-        }
+        .link-card:hover .cloak-indicator { opacity: 1; }
 
         /* Terminal Console */
         .terminal-container {
@@ -319,9 +335,9 @@
             height: 200px;
             overflow-y: auto;
             padding: 12px;
-            font-family: 'Courier New', monospace;
+            font-family: 'JetBrains Mono', monospace;
             font-size: 0.85rem;
-            color: #00ff88;
+            color: var(--success);
         }
         .terminal-input-line {
             display: flex;
@@ -329,55 +345,31 @@
             padding: 8px 12px;
             border-top: 1px solid rgba(0, 240, 255, 0.2);
         }
-        .terminal-prompt {
-            color: var(--primary);
-            margin-right: 8px;
-        }
+        .terminal-prompt { color: var(--primary); margin-right: 8px; }
         .terminal-input {
             flex: 1;
             background: transparent;
             border: none;
             color: white;
-            font-family: 'Courier New', monospace;
+            font-family: 'JetBrains Mono', monospace;
             font-size: 0.85rem;
             outline: none;
         }
-        .command-output {
-            margin: 4px 0;
-            padding: 4px 0;
-        }
-        .command-error {
-            color: #ff4444;
-        }
-        .command-success {
-            color: #00ff88;
-        }
-        .command-info {
-            color: #00f0ff;
-        }
-        .command-warn {
-            color: #ffaa00;
-        }
+        .command-output { margin: 4px 0; padding: 4px 0; }
+        .command-error { color: var(--error); }
+        .command-success { color: var(--success); }
+        .command-info { color: var(--primary); }
+        .command-warn { color: var(--warning); }
 
         /* Settings Modal */
-        .settings-modal {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.9);
-            backdrop-filter: blur(10px);
-            z-index: 10001;
-            display: none;
-            align-items: center;
-            justify-content: center;
-        }
         .settings-box {
             background: var(--surface);
             border: 1px solid rgba(255, 255, 255, 0.1);
             padding: 30px;
             border-radius: 16px;
             width: 90%;
-            max-width: 500px;
-            max-height: 80vh;
+            max-width: 600px;
+            max-height: 85vh;
             overflow-y: auto;
         }
         .setting-item {
@@ -386,12 +378,18 @@
             background: rgba(255, 255, 255, 0.03);
             border-radius: 8px;
             border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s;
+        }
+        .setting-item:hover {
+            border-color: rgba(0, 240, 255, 0.3);
+            background: rgba(255, 255, 255, 0.05);
         }
         .setting-label {
             display: block;
             margin-bottom: 8px;
             color: var(--primary);
             font-size: 0.9rem;
+            font-weight: 500;
         }
         .setting-desc {
             font-size: 0.75rem;
@@ -412,10 +410,7 @@
         .toggle-slider {
             position: absolute;
             cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
+            top: 0; left: 0; right: 0; bottom: 0;
             background-color: rgba(255, 255, 255, 0.2);
             transition: .4s;
             border-radius: 24px;
@@ -431,39 +426,12 @@
             transition: .4s;
             border-radius: 50%;
         }
-        input:checked + .toggle-slider {
-            background-color: var(--primary);
-        }
-        input:checked + .toggle-slider:before {
-            transform: translateX(26px);
-        }
+        input:checked + .toggle-slider { background-color: var(--primary); }
+        input:checked + .toggle-slider:before { transform: translateX(26px); }
 
-        /* Intro Modal */
-        .intro-modal {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.95);
-            backdrop-filter: blur(10px);
-            z-index: 10002;
-            display: none;
-            align-items: center;
-            justify-content: center;
-        }
-        .intro-box {
-            background: var(--surface);
-            border: 1px solid rgba(0, 240, 255, 0.3);
-            padding: 40px;
-            border-radius: 16px;
-            width: 90%;
-            max-width: 600px;
-            text-align: center;
-        }
-        .intro-step {
-            display: none;
-        }
-        .intro-step.active {
-            display: block;
-        }
+        /* Intro Styles */
+        .intro-step { display: none; }
+        .intro-step.active { display: block; animation: fadeIn 0.5s ease; }
         .intro-title {
             font-size: 2rem;
             margin-bottom: 20px;
@@ -487,10 +455,12 @@
             font-size: 1rem;
             text-align: center;
             margin-bottom: 20px;
+            transition: all 0.3s;
         }
         .name-input:focus {
             outline: none;
             border-color: var(--primary);
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.2);
         }
         .intro-btn {
             padding: 12px 30px;
@@ -500,19 +470,474 @@
             color: white;
             font-weight: bold;
             cursor: pointer;
-            transition: transform 0.2s;
+            transition: all 0.3s;
         }
         .intro-btn:hover {
             transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(0, 240, 255, 0.3);
         }
         .skip-intro {
             margin-top: 15px;
             color: rgba(255, 255, 255, 0.5);
             font-size: 0.8rem;
             cursor: pointer;
+            transition: color 0.3s;
         }
-        .skip-intro:hover {
+        .skip-intro:hover { color: var(--primary); }
+
+        /* Glitch Intro Animation */
+        .glitch-intro {
+            position: fixed;
+            inset: 0;
+            background: var(--bg);
+            z-index: 99999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .glitch-text {
+            font-size: 4rem;
+            font-weight: bold;
             color: var(--primary);
+            text-shadow: 
+                2px 0 var(--accent), 
+                -2px 0 var(--secondary);
+            animation: glitchText 0.3s infinite;
+            position: relative;
+        }
+        .glitch-text::before,
+        .glitch-text::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        .glitch-text::before {
+            animation: glitch-1 0.3s infinite;
+            color: var(--accent);
+            z-index: -1;
+        }
+        .glitch-text::after {
+            animation: glitch-2 0.3s infinite;
+            color: var(--secondary);
+            z-index: -2;
+        }
+        @keyframes glitchText {
+            0%, 100% { transform: translate(0); }
+            20% { transform: translate(-2px, 2px); }
+            40% { transform: translate(2px, -2px); }
+            60% { transform: translate(-2px, 0); }
+            80% { transform: translate(2px, 2px); }
+        }
+        .loading-sequence {
+            margin-top: 40px;
+            width: 300px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        .loading-progress {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary), var(--accent));
+            width: 0%;
+            transition: width 0.1s linear;
+            box-shadow: 0 0 20px var(--primary);
+        }
+        .loading-status {
+            margin-top: 20px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--primary);
+            height: 24px;
+        }
+        .loading-status::after {
+            content: '';
+            animation: typing 1s infinite;
+        }
+        @keyframes typing {
+            0%, 100% { content: ''; }
+            25% { content: '.'; }
+            50% { content: '..'; }
+            75% { content: '...'; }
+        }
+        .boot-logs {
+            position: absolute;
+            bottom: 40px;
+            left: 40px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.4);
+            max-height: 150px;
+            overflow: hidden;
+        }
+        .boot-log-line {
+            margin: 2px 0;
+            opacity: 0;
+            animation: logIn 0.2s forwards;
+        }
+        @keyframes logIn {
+            to { opacity: 1; }
+        }
+
+        /* Chatter Section */
+        .chatter-section {
+            background: linear-gradient(135deg, rgba(88, 101, 242, 0.1) 0%, rgba(0, 240, 255, 0.05) 100%);
+            border: 1px solid rgba(88, 101, 242, 0.3);
+            border-radius: 16px;
+            padding: 30px;
+            margin-top: 30px;
+        }
+        .chatter-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .chatter-logo {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #5865F2 0%, #7289DA 100%);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            box-shadow: 0 10px 30px rgba(88, 101, 242, 0.3);
+        }
+        .chatter-btn {
+            background: linear-gradient(135deg, #5865F2 0%, #7289DA 100%);
+            color: white;
+            padding: 15px 40px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 5px 20px rgba(88, 101, 242, 0.4);
+        }
+        .chatter-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(88, 101, 242, 0.5);
+        }
+        .chatter-stats {
+            display: flex;
+            gap: 30px;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .chatter-stat {
+            text-align: center;
+        }
+        .chatter-stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #5865F2;
+        }
+        .chatter-stat-label {
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.5);
+            text-transform: uppercase;
+        }
+
+        /* Chatter Launch Modal */
+        .chatter-launch-modal .modal-box {
+            max-width: 500px;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border: 1px solid #5865F2;
+        }
+        .chatter-launch-animation {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 20px;
+            position: relative;
+        }
+        .chatter-launch-circle {
+            position: absolute;
+            inset: 0;
+            border: 3px solid #5865F2;
+            border-radius: 50%;
+            animation: launchPulse 1.5s infinite;
+        }
+        .chatter-launch-circle:nth-child(2) { animation-delay: 0.3s; }
+        .chatter-launch-circle:nth-child(3) { animation-delay: 0.6s; }
+        @keyframes launchPulse {
+            0% { transform: scale(0.5); opacity: 1; }
+            100% { transform: scale(1.5); opacity: 0; }
+        }
+        .chatter-launch-icon {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+        }
+
+        /* Chat Simulation */
+        .chat-simulation {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            padding: 15px;
+            margin-top: 20px;
+            max-height: 200px;
+            overflow: hidden;
+        }
+        .chat-message {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin: 8px 0;
+            font-size: 0.85rem;
+            animation: slideIn 0.3s ease;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-10px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        .chat-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+        .chat-content {
+            flex: 1;
+        }
+        .chat-username {
+            color: var(--primary);
+            font-weight: 600;
+            font-size: 0.8rem;
+        }
+        .chat-text {
+            color: rgba(255, 255, 255, 0.8);
+        }
+        .chat-time {
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 0.7rem;
+        }
+
+        /* Tab System */
+        .tab-container { margin-top: 20px; }
+        .tab-buttons {
+            display: flex;
+            gap: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 20px;
+            position: relative;
+        }
+        .tab-btn {
+            padding: 10px 20px;
+            background: transparent;
+            border: none;
+            color: rgba(255, 255, 255, 0.5);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-bottom: 2px solid transparent;
+            font-size: 0.9rem;
+            position: relative;
+        }
+        .tab-btn:hover { 
+            color: white; 
+            border-bottom-color: rgba(255, 255, 255, 0.2);
+        }
+        .tab-btn.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
+
+        /* Settings-specific tabs fix */
+        #settingsModal .tab-buttons {
+            border-bottom-color: rgba(255, 255, 255, 0.1);
+        }
+        #settingsModal .tab-btn.active {
+            border-bottom-color: var(--primary);
+        }
+
+        /* Top Status Bar */
+        .top-status-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 36px;
+            background: rgba(5, 5, 5, 0.9);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+        }
+        .top-status-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        .top-status-right {
+            display: flex;
+            align-items: center;
+            gap: 25px;
+        }
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: rgba(255, 255, 255, 0.6);
+        }
+        .status-item .label {
+            color: rgba(255, 255, 255, 0.4);
+        }
+        .status-item .value {
+            color: var(--primary);
+        }
+        .weather-icon {
+            width: 20px;
+            height: 20px;
+            fill: var(--primary);
+        }
+        .connection-status {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .connection-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--success);
+            animation: pulse 2s infinite;
+        }
+
+        /* Decorative Elements */
+        .corner-accent {
+            position: fixed;
+            width: 100px;
+            height: 100px;
+            pointer-events: none;
+            z-index: 50;
+            opacity: 0.3;
+        }
+        .corner-accent.top-left {
+            top: 36px;
+            left: 0;
+            border-top: 2px solid var(--primary);
+            border-left: 2px solid var(--primary);
+        }
+        .corner-accent.top-right {
+            top: 36px;
+            right: 0;
+            border-top: 2px solid var(--primary);
+            border-right: 2px solid var(--primary);
+        }
+        .corner-accent.bottom-left {
+            bottom: 0;
+            left: 0;
+            border-bottom: 2px solid var(--primary);
+            border-left: 2px solid var(--primary);
+        }
+        .corner-accent.bottom-right {
+            bottom: 0;
+            right: 0;
+            border-bottom: 2px solid var(--primary);
+            border-right: 2px solid var(--primary);
+        }
+
+        /* Floating Elements */
+        .floating-icon {
+            position: fixed;
+            opacity: 0.05;
+            pointer-events: none;
+            animation: floatRotate 20s infinite linear;
+            z-index: 1;
+        }
+        @keyframes floatRotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* Data Usage Bar */
+        .data-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            width: 0%;
+            z-index: 100;
+            transition: width 0.3s ease;
+        }
+
+        /* Keyboard Shortcuts Hint */
+        .keyboard-hint {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 10px 15px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            color: rgba(255, 255, 255, 0.4);
+            z-index: 50;
+            backdrop-filter: blur(5px);
+        }
+        .keyboard-hint kbd {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: var(--primary);
+        }
+
+        /* Glass Morphism Cards */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+        }
+
+        /* Animated Border */
+        .animated-border {
+            position: relative;
+        }
+        .animated-border::before {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            background: linear-gradient(45deg, var(--primary), var(--secondary), var(--accent), var(--primary));
+            background-size: 400% 400%;
+            border-radius: inherit;
+            z-index: -1;
+            animation: borderRotate 3s linear infinite;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .animated-border:hover::before {
+            opacity: 1;
+        }
+        @keyframes borderRotate {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
 
         /* Credits */
@@ -522,13 +947,85 @@
             margin-left: 8px;
             font-weight: 300;
         }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .glitch-text { font-size: 2.5rem; }
+            .chatter-stats { flex-wrap: wrap; gap: 15px; }
+            .loading-sequence { width: 250px; }
+        }
+
+        /* Notifications */
+        .notification-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 99998;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .notification {
+            background: var(--surface);
+            border-left: 4px solid var(--primary);
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            animation: slideInRight 0.3s ease;
+            max-width: 300px;
+        }
+        .notification.success { border-left-color: var(--success); }
+        .notification.error { border-left-color: var(--error); }
+        .notification.warning { border-left-color: var(--warning); }
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        .notification-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        .notification-message {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        /* Theme Colors */
+        .theme-preview {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.3s;
+        }
+        .theme-preview:hover { transform: scale(1.2); }
+        .theme-preview.active { border-color: white; box-shadow: 0 0 10px currentColor; }
+        .theme-cyan { background: linear-gradient(135deg, #00f0ff, #7000ff); }
+        .theme-green { background: linear-gradient(135deg, #00ff88, #00aa55); }
+        .theme-orange { background: linear-gradient(135deg, #ffaa00, #ff5500); }
+        .theme-pink { background: linear-gradient(135deg, #ff00a0, #aa0066); }
+        .theme-red { background: linear-gradient(135deg, #ff4444, #aa0000); }
     </style>
 </head>
 <body class="antialiased selection:bg-cyan-500 selection:text-black">
 
+    <!-- Glitch Intro Animation -->
+    <div id="glitchIntro" class="glitch-intro">
+        <div class="glitch-text" data-text="anonyLoadr">anonyLoadr</div>
+        <div class="loading-sequence">
+            <div class="loading-progress" id="loadingProgress"></div>
+        </div>
+        <div class="loading-status" id="loadingStatus">Initializing system</div>
+        <div class="boot-logs" id="bootLogs"></div>
+    </div>
+
+    <!-- Notification Container -->
+    <div class="notification-container" id="notificationContainer"></div>
+
     <!-- Intro Modal -->
-    <div id="introModal" class="intro-modal">
-        <div class="intro-box">
+    <div id="introModal" class="modal-overlay">
+        <div class="modal-box" style="max-width: 500px;">
             <div class="intro-step active" id="step1">
                 <div class="w-16 h-16 bg-cyan-400/20 rounded-full flex items-center justify-center mx-auto mb-6 animate-pulse">
                     <div class="w-8 h-8 bg-cyan-400 rounded-full shadow-[0_0_20px_#00f0ff]"></div>
@@ -553,8 +1050,8 @@
             <div class="intro-step" id="step3">
                 <h2 class="intro-title">You're All Set!</h2>
                 <p class="intro-text">
-                    Use <code>help</code> in the terminal to see available commands.<br>
-                    Type <code>reset</code> anytime to redo this intro.
+                    Use <code class="bg-cyan-400/20 px-2 py-1 rounded">help</code> in the terminal to see available commands.<br>
+                    Type <code class="bg-cyan-400/20 px-2 py-1 rounded">reset</code> anytime to redo this intro.
                 </p>
                 <button class="intro-btn" onclick="finishIntro()">Enter Dashboard</button>
             </div>
@@ -562,16 +1059,16 @@
     </div>
 
     <!-- Login Modal -->
-    <div id="loginModal">
-        <div class="login-box">
+    <div id="loginModal" class="modal-overlay">
+        <div class="modal-box">
             <div class="w-3 h-3 bg-cyan-400 rounded-full animate-pulse shadow-[0_0_10px_#00f0ff] mx-auto mb-4"></div>
             <h2 class="text-2xl font-bold mb-2 glitch" data-text="anonyLoadr">anonyLoadr</h2>
             <p class="text-gray-400 text-sm mb-6">Enter password or access key to unlock premium content</p>
             
-            <input type="password" id="passwordInput" class="login-input" placeholder="Password or Key...">
-            <button onclick="checkAuth()" class="login-btn">Unlock</button>
-            <button onclick="showKeyPrompt()" class="login-btn enter-key-btn">🔑 Enter Key</button>
-            <button onclick="skipLogin()" class="login-btn skip-btn">Continue Free (Limited)</button>
+            <input type="password" id="passwordInput" class="modal-input" placeholder="Password or Key...">
+            <button onclick="checkAuth()" class="modal-btn">Unlock</button>
+            <button onclick="showKeyPrompt()" class="modal-btn secondary">🔑 Enter Key</button>
+            <button onclick="skipLogin()" class="modal-btn secondary">Continue Free (Limited)</button>
             
             <div id="errorMsg" class="error-msg">Invalid password or key</div>
             <div id="successMsg" class="success-msg">Access granted! Loading...</div>
@@ -583,66 +1080,239 @@
     </div>
 
     <!-- Settings Modal -->
-    <div id="settingsModal" class="settings-modal">
+    <div id="settingsModal" class="modal-overlay">
         <div class="settings-box">
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-2xl font-bold">Settings</h2>
-                <button onclick="closeSettings()" class="text-gray-400 hover:text-white text-2xl">&times;</button>
+                <button onclick="closeSettings()" class="text-gray-400 hover:text-white text-2xl transition">&times;</button>
             </div>
             
-            <div class="setting-item">
-                <label class="setting-label">Auto-Cloak Links</label>
-                <p class="setting-desc">Open all links in cloaked about:blank windows</p>
-                <label class="toggle-switch">
-                    <input type="checkbox" id="autoCloakToggle" checked onchange="toggleSetting('autoCloak')">
-                    <span class="toggle-slider"></span>
-                </label>
+            <div class="tab-buttons">
+                <button class="tab-btn active" onclick="switchSettingsTab('general', this)">General</button>
+                <button class="tab-btn" onclick="switchSettingsTab('appearance', this)">Appearance</button>
+                <button class="tab-btn" onclick="switchSettingsTab('advanced', this)">Advanced</button>
+            </div>
+
+            <!-- General Tab -->
+            <div id="tab-general" class="tab-content active">
+                <div class="setting-item">
+                    <label class="setting-label">Auto-Cloak Links</label>
+                    <p class="setting-desc">Open all links in cloaked about:blank windows</p>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="autoCloakToggle" checked onchange="toggleSetting('autoCloak')">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                
+                <div class="setting-item">
+                    <label class="setting-label">Custom Cursor</label>
+                    <p class="setting-desc">Enable the custom cyber cursor</p>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="cursorToggle" checked onchange="toggleSetting('customCursor')">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                
+                <div class="setting-item">
+                    <label class="setting-label">Background Effects</label>
+                    <p class="setting-desc">Enable animated particles and grid</p>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="effectsToggle" checked onchange="toggleSetting('bgEffects')">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                
+                <div class="setting-item">
+                    <label class="setting-label">Scanlines</label>
+                    <p class="setting-desc">Show CRT scanline effect</p>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="scanlinesToggle" checked onchange="toggleSetting('scanlines')">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                
+                <div class="setting-item">
+                    <label class="setting-label">Terminal Sounds</label>
+                    <p class="setting-desc">Enable typing sound effects</p>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="soundsToggle" onchange="toggleSetting('terminalSounds')">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+
+                <div class="setting-item">
+                    <label class="setting-label">Notifications</label>
+                    <p class="setting-desc">Enable desktop notifications</p>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="notificationsToggle" onchange="toggleSetting('notifications')">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Appearance Tab -->
+            <div id="tab-appearance" class="tab-content">
+                <div class="setting-item">
+                    <label class="setting-label">Theme Color</label>
+                    <p class="setting-desc">Choose your accent color</p>
+                    <div class="flex gap-3 mt-3">
+                        <div class="theme-preview theme-cyan active" onclick="setTheme('cyan')" title="Cyan"></div>
+                        <div class="theme-preview theme-green" onclick="setTheme('green')" title="Green"></div>
+                        <div class="theme-preview theme-orange" onclick="setTheme('orange')" title="Orange"></div>
+                        <div class="theme-preview theme-pink" onclick="setTheme('pink')" title="Pink"></div>
+                        <div class="theme-preview theme-red" onclick="setTheme('red')" title="Red"></div>
+                    </div>
+                </div>
+
+                <div class="setting-item">
+                    <label class="setting-label">Animation Speed</label>
+                    <p class="setting-desc">Adjust UI animation speed</p>
+                    <select id="animationSpeed" class="modal-input" onchange="toggleSetting('animationSpeed', this.value)" style="margin-top: 10px;">
+                        <option value="slow">Slow</option>
+                        <option value="normal" selected>Normal</option>
+                        <option value="fast">Fast</option>
+                        <option value="instant">Instant</option>
+                    </select>
+                </div>
+
+                <div class="setting-item">
+                    <label class="setting-label">Particle Density</label>
+                    <p class="setting-desc">Number of background particles</p>
+                    <select id="particleDensity" class="modal-input" onchange="toggleSetting('particleDensity', this.value)" style="margin-top: 10px;">
+                        <option value="none">None</option>
+                        <option value="low">Low</option>
+                        <option value="medium" selected>Medium</option>
+                        <option value="high">High</option>
+                    </select>
+                </div>
+
+                <div class="setting-item">
+                    <label class="setting-label">Corner Accents</label>
+                    <p class="setting-desc">Show decorative corner borders</p>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="cornerAccentsToggle" checked onchange="toggleSetting('cornerAccents')">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+
+                <div class="setting-item">
+                    <label class="setting-label">Floating Icons</label>
+                    <p class="setting-desc">Show floating background icons</p>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="floatingIconsToggle" checked onchange="toggleSetting('floatingIcons')">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+
+                <div class="setting-item">
+                    <label class="setting-label">Data Usage Bar</label>
+                    <p class="setting-desc">Show animated bottom progress bar</p>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="dataBarToggle" checked onchange="toggleSetting('dataBar')">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+
+                <div class="setting-item">
+                    <label class="setting-label">Keyboard Shortcuts Hint</label>
+                    <p class="setting-desc">Show keyboard shortcuts at bottom left</p>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="keyboardHintToggle" checked onchange="toggleSetting('keyboardHint')">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+
+                <div class="setting-item">
+                    <label class="setting-label">Weather API Key</label>
+                    <p class="setting-desc">Enter OpenWeatherMap API key. Note: Free tier may have CORS restrictions. If API fails, demo mode will show sample weather data.</p>
+                    <input type="text" id="weatherApiKey" class="modal-input" placeholder="Enter API key..." style="margin-top: 10px;" onchange="toggleSetting('weatherApiKey', this.value)">
+                    <button onclick="testWeatherApi()" class="modal-btn secondary" style="margin-top: 10px; width: auto; padding: 8px 16px; font-size: 0.8rem;">Test API</button>
+                    <button onclick="useDemoWeather()" class="modal-btn secondary" style="margin-top: 10px; width: auto; padding: 8px 16px; font-size: 0.8rem; margin-left: 8px;">Use Demo</button>
+                </div>
+
+                <div class="setting-item">
+                    <label class="setting-label">Weather Location</label>
+                    <p class="setting-desc">City name for weather display</p>
+                    <input type="text" id="weatherLocation" class="modal-input" placeholder="London, New York, etc." style="margin-top: 10px;" onchange="toggleSetting('weatherLocation', this.value)">
+                </div>
+            </div>
+
+            <!-- Advanced Tab -->
+            <div id="tab-advanced" class="tab-content">
+                <div class="setting-item">
+                    <label class="setting-label">Session Persistence</label>
+                    <p class="setting-desc">Keep session active after closing browser</p>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="sessionPersistToggle" checked onchange="toggleSetting('sessionPersist')">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+
+                <div class="setting-item">
+                    <label class="setting-label">Developer Mode</label>
+                    <p class="setting-desc">Enable debug logging and extra commands</p>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="devModeToggle" onchange="toggleSetting('devMode')">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+
+                <div class="setting-item">
+                    <label class="setting-label">Export Data</label>
+                    <p class="setting-desc">Download your settings and slots as JSON</p>
+                    <button onclick="exportData()" class="modal-btn" style="margin-top: 10px; width: auto; padding: 8px 20px;">Export</button>
+                </div>
+
+                <div class="setting-item">
+                    <label class="setting-label">Import Data</label>
+                    <p class="setting-desc">Import settings from JSON file</p>
+                    <input type="file" id="importFile" accept=".json" onchange="importData(this)" style="display: none;">
+                    <button onclick="document.getElementById('importFile').click()" class="modal-btn secondary" style="margin-top: 10px; width: auto; padding: 8px 20px;">Import</button>
+                </div>
             </div>
             
-            <div class="setting-item">
-                <label class="setting-label">Custom Cursor</label>
-                <p class="setting-desc">Enable the custom cyber cursor</p>
-                <label class="toggle-switch">
-                    <input type="checkbox" id="cursorToggle" checked onchange="toggleSetting('customCursor')">
-                    <span class="toggle-slider"></span>
-                </label>
-            </div>
-            
-            <div class="setting-item">
-                <label class="setting-label">Background Effects</label>
-                <p class="setting-desc">Enable animated particles and grid</p>
-                <label class="toggle-switch">
-                    <input type="checkbox" id="effectsToggle" checked onchange="toggleSetting('bgEffects')">
-                    <span class="toggle-slider"></span>
-                </label>
-            </div>
-            
-            <div class="setting-item">
-                <label class="setting-label">Scanlines</label>
-                <p class="setting-desc">Show CRT scanline effect</p>
-                <label class="toggle-switch">
-                    <input type="checkbox" id="scanlinesToggle" checked onchange="toggleSetting('scanlines')">
-                    <span class="toggle-slider"></span>
-                </label>
-            </div>
-            
-            <div class="setting-item">
-                <label class="setting-label">Terminal Sounds</label>
-                <p class="setting-desc">Enable typing sound effects</p>
-                <label class="toggle-switch">
-                    <input type="checkbox" id="soundsToggle" onchange="toggleSetting('terminalSounds')">
-                    <span class="toggle-slider"></span>
-                </label>
-            </div>
-            
-            <div class="mt-6 pt-6 border-t border-white/10">
-                <button onclick="resetIntro()" class="text-sm text-cyan-400 hover:text-cyan-300 transition">
-                    ↻ Redo Introduction
-                </button>
-                <button onclick="clearAllData()" class="text-sm text-red-400 hover:text-red-300 transition ml-4">
+            <div class="mt-6 pt-6 border-t border-white/10 flex justify-between">
+                <div>
+                    <button onclick="resetIntro()" class="text-sm text-cyan-400 hover:text-cyan-300 transition">
+                        ↻ Redo Introduction
+                    </button>
+                </div>
+                <button onclick="clearAllData()" class="text-sm text-red-400 hover:text-red-300 transition">
                     ⚠ Clear All Data
                 </button>
             </div>
+        </div>
+    </div>
+
+    <!-- Add Slot Modal -->
+    <div id="slotModal" class="modal-overlay">
+        <div class="modal-box" style="max-width: 450px;">
+            <h2 class="text-2xl font-bold mb-4">Add Custom Site</h2>
+            <p class="text-gray-400 text-sm mb-6">Fill in the details to add a new site slot</p>
+            
+            <input type="text" id="slotName" class="modal-input" placeholder="Site Name">
+            <input type="url" id="slotUrl" class="modal-input" placeholder="https://example.com">
+            <input type="text" id="slotDesc" class="modal-input" placeholder="Description (optional)">
+            
+            <div class="flex gap-3 mt-4">
+                <button onclick="saveSlot()" class="modal-btn flex-1">Add Site</button>
+                <button onclick="closeSlotModal()" class="modal-btn secondary flex-1">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chatter Launch Modal -->
+    <div id="chatterLaunchModal" class="modal-overlay chatter-launch-modal">
+        <div class="modal-box">
+            <div class="chatter-launch-animation">
+                <div class="chatter-launch-circle"></div>
+                <div class="chatter-launch-circle"></div>
+                <div class="chatter-launch-circle"></div>
+                <div class="chatter-launch-icon">💬</div>
+            </div>
+            <h2 class="text-2xl font-bold mb-2" style="color: #5865F2;">Chatter</h2>
+            <p class="text-gray-400 text-sm mb-4">Connecting to secure chat servers...</p>
+            <div class="text-xs font-mono text-gray-500" id="chatterLaunchStatus">Establishing connection</div>
         </div>
     </div>
 
@@ -656,11 +1326,67 @@
     <div class="scanlines"></div>
     <div id="particles" class="fixed inset-0 pointer-events-none"></div>
 
+    <!-- Top Status Bar -->
+    <div class="top-status-bar" id="topStatusBar">
+        <div class="top-status-left">
+            <div class="status-item">
+                <span class="label">Hello,</span>
+                <span class="value" id="topBarUsername">User</span>
+            </div>
+            <div class="connection-status">
+                <div class="connection-dot"></div>
+                <span style="color: var(--success);">SECURE</span>
+            </div>
+        </div>
+        <div class="top-status-right">
+            <div class="status-item">
+                <svg class="weather-icon" id="weatherIcon" viewBox="0 0 24 24">
+                    <path d="M12 2a9 9 0 0 0-9 9c0 4.97 4.03 9 9 9s9-4.03 9-9a9 9 0 0 0-9-9zm0 16c-3.86 0-7-3.14-7-7s3.14-7 7-7 7 3.14 7 7-3.14 7-7 7z"/>
+                </svg>
+                <span id="weatherTemp">--°C</span>
+                <span class="label" id="weatherDesc">Loading...</span>
+            </div>
+            <div class="status-item">
+                <span class="label">Time:</span>
+                <span class="value" id="topBarTime">00:00:00</span>
+            </div>
+            <div class="status-item">
+                <span class="label">Date:</span>
+                <span class="value" id="topBarDate">--/--/----</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Corner Accents -->
+    <div class="corner-accent top-left"></div>
+    <div class="corner-accent top-right"></div>
+    <div class="corner-accent bottom-left"></div>
+    <div class="corner-accent bottom-right"></div>
+
+    <!-- Floating Icons -->
+    <svg class="floating-icon" style="top: 20%; left: 5%; width: 40px; height: 40px;" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+    </svg>
+    <svg class="floating-icon" style="top: 60%; right: 8%; width: 30px; height: 30px; animation-delay: -5s;" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/>
+    </svg>
+    <svg class="floating-icon" style="bottom: 30%; left: 10%; width: 35px; height: 35px; animation-delay: -10s;" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/>
+    </svg>
+
+    <!-- Data Usage Bar -->
+    <div class="data-bar" id="dataBar"></div>
+
+    <!-- Keyboard Shortcuts Hint -->
+    <div class="keyboard-hint" id="keyboardHint">
+        <kbd>Ctrl</kbd> + <kbd>K</kbd> Terminal &nbsp;|&nbsp; <kbd>/</kbd> Search &nbsp;|&nbsp; <kbd>Esc</kbd> Close
+    </div>
+
     <!-- Main Content -->
-    <div class="relative z-10 min-h-screen flex flex-col" id="mainContent" style="display: none;">
+    <div class="relative z-10 min-h-screen flex flex-col pt-9" id="mainContent" style="display: none;">
         
         <!-- Header -->
-        <header class="p-6 md:p-10 flex justify-between items-center border-b border-white/10 backdrop-blur-sm">
+        <header class="p-6 md:p-10 flex justify-between items-center border-b border-white/10 backdrop-blur-sm mt-2">
             <div class="flex items-center gap-3">
                 <div class="w-3 h-3 bg-cyan-400 rounded-full animate-pulse shadow-[0_0_10px_#00f0ff]"></div>
                 <h1 class="text-2xl md:text-4xl font-bold tracking-tighter glitch" data-text="anonyLoadr">
@@ -670,7 +1396,7 @@
             </div>
             <div class="flex items-center gap-4">
                 <span id="greeting" class="hidden md:block text-sm text-cyan-400/80 mr-4"></span>
-                <button onclick="openSettings()" class="text-xs text-gray-400 hover:text-white transition px-3 py-1 rounded border border-white/20">⚙ Settings</button>
+                <button onclick="openSettings()" class="text-xs text-gray-400 hover:text-white transition px-3 py-1 rounded border border-white/20 hover:border-cyan-400/50">⚙ Settings</button>
                 <button onclick="logout()" class="text-xs text-gray-400 hover:text-white transition">Logout</button>
                 <div class="status-bar hidden md:block">
                     <span class="status-dot text-green-400">●</span> <span id="systemStatus">FREE_TIER</span>
@@ -681,6 +1407,7 @@
         <!-- Main Grid -->
         <main class="flex-1 p-6 md:p-10 max-w-7xl mx-auto w-full">
             
+            <!-- Welcome Section -->
             <div class="mb-12 text-center md:text-left">
                 <p class="text-gray-400 text-sm md:text-base tracking-widest uppercase mb-2" id="tierText">Free Gateway Protocol</p>
                 <h2 class="text-3xl md:text-5xl font-light leading-tight">
@@ -690,13 +1417,144 @@
                 <p class="text-cyan-400/60 text-sm mt-2 font-mono">All links auto-cloak on open</p>
             </div>
 
-            <!-- Links Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="linksGrid"></div>
+            <!-- Tab Navigation -->
+            <div class="tab-buttons mb-8">
+                <button class="tab-btn active" onclick="switchMainTab('proxies', this)">🌐 Proxies</button>
+                <button class="tab-btn" onclick="switchMainTab('slots', this)">📌 My Slots</button>
+                <button class="tab-btn" onclick="switchMainTab('chatter', this)">💬 Chatter</button>
+                <button class="tab-btn" onclick="switchMainTab('tools', this)">🛠 Tools</button>
+            </div>
+
+            <!-- Proxies Tab -->
+            <div id="main-tab-proxies" class="tab-content active">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="linksGrid"></div>
+            </div>
+
+            <!-- Site Slots Tab -->
+            <div id="main-tab-slots" class="tab-content">
+                <div class="flex justify-between items-center mb-6">
+                    <div>
+                        <h3 class="text-xl font-bold">Custom Site Slots</h3>
+                        <p class="text-sm text-gray-400">Add your own websites for quick access</p>
+                    </div>
+                    <button onclick="openSlotModal()" class="modal-btn" style="width: auto; padding: 10px 20px;">+ Add Site</button>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="slotsGrid">
+                    <div class="slot-card p-8 rounded-xl text-center cursor-pointer" onclick="openSlotModal()">
+                        <div class="text-5xl mb-4">+</div>
+                        <h4 class="text-lg font-bold text-cyan-400">Add New Site</h4>
+                        <p class="text-sm text-gray-400 mt-2">Click to add a custom site slot</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chatter Tab -->
+            <div id="main-tab-chatter" class="tab-content">
+                <div class="chatter-section">
+                    <div class="chatter-header">
+                        <div class="chatter-logo">💬</div>
+                        <div>
+                            <h3 class="text-2xl font-bold" style="color: #5865F2;">Chatter</h3>
+                            <p class="text-sm text-gray-400">Connect with the community anonymously</p>
+                        </div>
+                    </div>
+                    
+                    <p class="text-gray-300 leading-relaxed mb-6">
+                        Join thousands of users in our secure, anonymous chat platform. Share ideas, 
+                        get help, and connect with like-minded individuals without compromising your privacy.
+                    </p>
+
+                    <button onclick="launchChatter()" class="chatter-btn">Enter Chatter</button>
+
+                    <div class="chatter-stats">
+                        <div class="chatter-stat">
+                            <div class="chatter-stat-value" id="onlineUsers">2,847</div>
+                            <div class="chatter-stat-label">Online Now</div>
+                        </div>
+                        <div class="chatter-stat">
+                            <div class="chatter-stat-value">15.2K</div>
+                            <div class="chatter-stat-label">Members</div>
+                        </div>
+                        <div class="chatter-stat">
+                            <div class="chatter-stat-value">128</div>
+                            <div class="chatter-stat-label">Channels</div>
+                        </div>
+                        <div class="chatter-stat">
+                            <div class="chatter-stat-value">99.9%</div>
+                            <div class="chatter-stat-label">Uptime</div>
+                        </div>
+                    </div>
+
+                    <!-- Live Chat Simulation -->
+                    <div class="chat-simulation" id="chatSimulation">
+                        <div class="text-xs text-gray-500 mb-2">Live Activity</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tools Tab -->
+            <div id="main-tab-tools" class="tab-content">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- URL Cloaker Tool -->
+                    <div class="link-card p-6 rounded-xl">
+                        <h4 class="text-xl font-bold mb-4 flex items-center gap-2">
+                            <span>🎭</span> URL Cloaker
+                        </h4>
+                        <p class="text-sm text-gray-400 mb-4">Cloak any URL instantly</p>
+                        <input type="url" id="cloakUrlInput" class="modal-input" placeholder="https://example.com" style="margin-bottom: 10px;">
+                        <button onclick="cloakCustomUrl()" class="modal-btn">Cloak & Open</button>
+                    </div>
+
+                    <!-- Base64 Encoder -->
+                    <div class="link-card p-6 rounded-xl">
+                        <h4 class="text-xl font-bold mb-4 flex items-center gap-2">
+                            <span>🔐</span> Base64 Tools
+                        </h4>
+                        <p class="text-sm text-gray-400 mb-4">Encode/Decode text</p>
+                        <div class="flex gap-2 mb-2">
+                            <input type="text" id="base64Input" class="modal-input flex-1" placeholder="Enter text...">
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="base64Encode()" class="modal-btn flex-1" style="padding: 8px;">Encode</button>
+                            <button onclick="base64Decode()" class="modal-btn secondary flex-1" style="padding: 8px;">Decode</button>
+                        </div>
+                        <div id="base64Result" class="mt-3 p-2 bg-black/30 rounded text-xs font-mono break-all hidden"></div>
+                    </div>
+
+                    <!-- Password Generator -->
+                    <div class="link-card p-6 rounded-xl">
+                        <h4 class="text-xl font-bold mb-4 flex items-center gap-2">
+                            <span>🔑</span> Password Generator
+                        </h4>
+                        <p class="text-sm text-gray-400 mb-4">Generate secure passwords</p>
+                        <div class="flex items-center gap-3 mb-4">
+                            <label class="text-sm">Length:</label>
+                            <input type="range" id="passLength" min="8" max="32" value="16" class="flex-1" oninput="document.getElementById('passLengthVal').textContent = this.value">
+                            <span id="passLengthVal" class="text-cyan-400 font-mono">16</span>
+                        </div>
+                        <button onclick="generatePassword()" class="modal-btn mb-2">Generate</button>
+                        <div id="passwordResult" class="p-2 bg-black/30 rounded text-center font-mono text-sm hidden cursor-pointer" onclick="copyToClipboard(this.textContent)"></div>
+                    </div>
+
+                    <!-- QR Code Generator -->
+                    <div class="link-card p-6 rounded-xl">
+                        <h4 class="text-xl font-bold mb-4 flex items-center gap-2">
+                            <span>📱</span> QR Generator
+                        </h4>
+                        <p class="text-sm text-gray-400 mb-4">Create QR codes for URLs</p>
+                        <input type="text" id="qrInput" class="modal-input" placeholder="Enter URL or text..." style="margin-bottom: 10px;">
+                        <button onclick="generateQR()" class="modal-btn">Generate QR</button>
+                        <div id="qrResult" class="mt-4 flex justify-center hidden">
+                            <img id="qrImage" alt="QR Code" class="bg-white p-2 rounded">
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             <!-- Terminal Console -->
             <div class="mt-12 terminal-container">
                 <div class="terminal-header">
-                    <span class="text-xs text-cyan-400 font-mono">anonyLoadr_console_v2.0</span>
+                    <span class="text-xs text-cyan-400 font-mono">anonyLoadr_console_v3.0</span>
                     <div class="flex gap-2">
                         <span class="w-3 h-3 rounded-full bg-red-500/50"></span>
                         <span class="w-3 h-3 rounded-full bg-yellow-500/50"></span>
@@ -714,11 +1572,12 @@
         <!-- Footer -->
         <footer class="p-6 text-center text-white/30 text-xs border-t border-white/10 backdrop-blur-sm">
             <p>ENCRYPTED CONNECTION // <span id="userTier">GUEST</span> // <span id="clock">00:00:00</span></p>
-            <p class="mt-1 text-cyan-400/40">crafted by extinct</p>
+            <p class="mt-1 text-cyan-400/40">crafted by extinct // v3.0</p>
         </footer>
     </div>
 
     <script>
+
         // ==========================================
         // CONFIGURATION
         // ==========================================
@@ -730,8 +1589,18 @@
                 "KEY-2026-001",
                 "KEY-2026-002", 
                 "VIP-USER-001",
-                "VIP-USER-002"
+                "VIP-USER-002",
+                "ANONY-2026-X",
+                "LOADR-PREMIUM"
             ],
+            
+            THEMES: {
+                cyan: { primary: '#00f0ff', secondary: '#7000ff', accent: '#ff00a0' },
+                green: { primary: '#00ff88', secondary: '#00aa55', accent: '#44ffaa' },
+                orange: { primary: '#ffaa00', secondary: '#ff5500', accent: '#ff8800' },
+                pink: { primary: '#ff00a0', secondary: '#aa0066', accent: '#ff44aa' },
+                red: { primary: '#ff4444', secondary: '#aa0000', accent: '#ff6666' }
+            },
             
             FREE_LINKS: [
                 {
@@ -773,6 +1642,19 @@
                     desc: "OG LMFAO",
                     icon: `<svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M13.604 8.4h-3.405V12h3.405c.996 0 1.8-.804 1.8-1.8s-.804-1.8-1.8-1.8zM12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm0 19.2c-3.976 0-7.2-3.224-7.2-7.2S8.024 4.8 12 4.8s7.2 3.224 7.2 7.2-3.224 7.2-7.2 7.2z"/></svg>`
                 }
+            ],
+
+            CHATTER_URL: "https://example.com",
+
+            CHAT_MESSAGES: [
+                { user: "Neo", msg: "Just found a new proxy!", color: "#00f0ff" },
+                { user: "Ghost", msg: "Thanks for the cloak tool", color: "#ff00a0" },
+                { user: "Shadow", msg: "Anyone online?", color: "#00ff88" },
+                { user: "Cipher", msg: "Working on a new bypass", color: "#ffaa00" },
+                { user: "Raven", msg: "Vapor V4 is fast today", color: "#7000ff" },
+                { user: "Phantom", msg: "Stay safe out there", color: "#ff4444" },
+                { user: "Zero", msg: "New update looks sick!", color: "#00f0ff" },
+                { user: "Glitch", msg: "Testing the encoder...", color: "#ff00a0" }
             ]
         };
 
@@ -780,15 +1662,113 @@
         let isPremium = false;
         let usedKey = null;
         let username = 'User';
+        let customSlots = [];
+        let currentTheme = 'cyan';
         let settings = {
             autoCloak: true,
             customCursor: true,
             bgEffects: true,
             scanlines: true,
-            terminalSounds: false
+            terminalSounds: false,
+            notifications: false,
+            animationSpeed: 'normal',
+            particleDensity: 'medium',
+            sessionPersist: true,
+            devMode: false,
+            cornerAccents: true,
+            floatingIcons: true,
+            dataBar: true,
+            keyboardHint: true,
+            weatherApiKey: '',
+            weatherLocation: 'London'
         };
 
-        // Available commands
+        // ==========================================
+        // GLITCH INTRO ANIMATION
+        // ==========================================
+        
+        const BOOT_LOGS = [
+            "Initializing kernel...",
+            "Loading modules...",
+            "Mounting filesystems...",
+            "Starting network daemon...",
+            "Establishing secure connection...",
+            "Verifying encryption keys...",
+            "Loading user preferences...",
+            "Initializing UI components...",
+            "Starting anonyLoadr...",
+            "System ready."
+        ];
+
+        function startGlitchIntro() {
+            const intro = document.getElementById('glitchIntro');
+            const progress = document.getElementById('loadingProgress');
+            const status = document.getElementById('loadingStatus');
+            const logsContainer = document.getElementById('bootLogs');
+            
+            let progressValue = 0;
+            let logIndex = 0;
+            
+            // Add boot logs
+            const logInterval = setInterval(() => {
+                if (logIndex < BOOT_LOGS.length) {
+                    const log = document.createElement('div');
+                    log.className = 'boot-log-line';
+                    log.textContent = `[${new Date().toLocaleTimeString()}] ${BOOT_LOGS[logIndex]}`;
+                    logsContainer.appendChild(log);
+                    logIndex++;
+                    logsContainer.scrollTop = logsContainer.scrollHeight;
+                }
+            }, 150);
+            
+            // Animate progress
+            const progressInterval = setInterval(() => {
+                progressValue += Math.random() * 15;
+                if (progressValue >= 100) {
+                    progressValue = 100;
+                    clearInterval(progressInterval);
+                    clearInterval(logInterval);
+                    
+                    status.textContent = "System ready";
+                    
+                    setTimeout(() => {
+                        intro.style.animation = 'fadeOut 0.5s forwards';
+                        setTimeout(() => {
+                            intro.style.display = 'none';
+                            checkSession();
+                        }, 500);
+                    }, 500);
+                }
+                progress.style.width = progressValue + '%';
+                
+                // Random status updates
+                const statuses = [
+                    "Initializing system",
+                    "Loading modules",
+                    "Connecting to network",
+                    "Verifying security",
+                    "Preparing dashboard"
+                ];
+                if (Math.random() > 0.7) {
+                    status.textContent = statuses[Math.floor(Math.random() * statuses.length)];
+                }
+            }, 100);
+        }
+
+        // Add fadeOut keyframe
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fadeOut {
+                from { opacity: 1; }
+                to { opacity: 0; visibility: hidden; }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // ==========================================
+        // COMMANDS
+        // ==========================================
+        
         const COMMANDS = {
             help: {
                 desc: "Show available commands",
@@ -823,15 +1803,11 @@
             },
             time: {
                 desc: "Show current time",
-                action: () => {
-                    return new Date().toLocaleString();
-                }
+                action: () => new Date().toLocaleString()
             },
             date: {
                 desc: "Show current date",
-                action: () => {
-                    return new Date().toDateString();
-                }
+                action: () => new Date().toDateString()
             },
             links: {
                 desc: "List available links",
@@ -848,6 +1824,19 @@
                     } else {
                         output += "\n🔒 4 premium links locked. Use 'redeem' to upgrade.";
                     }
+                    return output;
+                }
+            },
+            slots: {
+                desc: "List custom site slots",
+                action: () => {
+                    if (customSlots.length === 0) {
+                        return "No custom slots. Use the 'My Slots' tab to add sites.";
+                    }
+                    let output = "Custom Site Slots:\n";
+                    customSlots.forEach((slot, i) => {
+                        output += `  [${i + 1}] ${slot.name} - ${slot.url}\n`;
+                    });
                     return output;
                 }
             },
@@ -874,7 +1863,6 @@
                     const key = args.join(' ');
                     
                     if (key === 'password') {
-                        // Prompt for password
                         setTimeout(() => {
                             const pass = prompt('Enter master password:');
                             if (pass === CONFIG.MASTER_PASSWORD) {
@@ -927,14 +1915,22 @@
             status: {
                 desc: "Show system status",
                 action: () => {
-                    return `System Status:\n  User: ${username}\n  Tier: ${isPremium ? 'PREMIUM ✓' : 'FREE'}\n  Links: ${isPremium ? '6/6' : '2/6'}\n  Cloak: ${settings.autoCloak ? 'ACTIVE' : 'OFF'}\n  Cursor: ${settings.customCursor ? 'CUSTOM' : 'DEFAULT'}\n  Effects: ${settings.bgEffects ? 'ON' : 'OFF'}`;
+                    return `System Status:
+  User: ${username}
+  Tier: ${isPremium ? 'PREMIUM ✓' : 'FREE'}
+  Links: ${isPremium ? '6/6' : '2/6'}
+  Slots: ${customSlots.length}
+  Cloak: ${settings.autoCloak ? 'ACTIVE' : 'OFF'}
+  Cursor: ${settings.customCursor ? 'CUSTOM' : 'DEFAULT'}
+  Effects: ${settings.bgEffects ? 'ON' : 'OFF'}
+  Theme: ${currentTheme.toUpperCase()}
+  Weather: ${settings.weatherLocation}
+  Time: ${new Date().toLocaleTimeString()}`;
                 }
             },
             echo: {
                 desc: "Echo text back (usage: echo <text>)",
-                action: (args) => {
-                    return args ? args.join(' ') : '';
-                }
+                action: (args) => args ? args.join(' ') : ''
             },
             calc: {
                 desc: "Simple calculator (usage: calc <expression>)",
@@ -942,7 +1938,6 @@
                     if (!args || args.length === 0) return "Usage: calc 2+2";
                     try {
                         const expr = args.join('');
-                        // Safe eval alternative
                         const result = Function('"use strict"; return (' + expr + ')')();
                         return `${expr} = ${result}`;
                     } catch (e) {
@@ -974,14 +1969,25 @@
             about: {
                 desc: "About anonyLoadr",
                 action: () => {
-                    return `anonyLoadr v2.0\nCreated by extinct\n\nA secure, anonymous browsing gateway with cloaking technology.\nAll connections are encrypted and masked for privacy.\n\nFeatures:\n  • Auto-cloaked link opening\n  • Premium key system\n  • Interactive terminal\n  • Customizable settings\n  • Session persistence`;
+                    return `anonyLoadr v3.0
+Created by extinct
+
+A secure, anonymous browsing gateway with cloaking technology.
+All connections are encrypted and masked for privacy.
+
+Features:
+  • Auto-cloaked link opening
+  • Premium key system
+  • Interactive terminal
+  • Custom site slots
+  • Chatter platform
+  • Utility tools
+  • Customizable themes`;
                 }
             },
             version: {
                 desc: "Show version info",
-                action: () => {
-                    return "anonyLoadr v2.0.0 'Cyberpunk Edition'\nBuild: 2026.02.14\nAuthor: extinct";
-                }
+                action: () => "anonyLoadr v3.0.0 'Glitch Edition'\nBuild: 2026.02.14\nAuthor: extinct"
             },
             hack: {
                 desc: "Fake hacking animation (just for fun)",
@@ -1006,46 +2012,102 @@
                     }, 100);
                     return "Initiating sequence...";
                 }
+            },
+            theme: {
+                desc: "Change theme (usage: theme <cyan|green|orange|pink|red>)",
+                action: (args) => {
+                    if (!args || args.length === 0) {
+                        return "Usage: theme <cyan|green|orange|pink|red>\nCurrent theme: " + currentTheme;
+                    }
+                    const theme = args[0].toLowerCase();
+                    if (CONFIG.THEMES[theme]) {
+                        setTheme(theme);
+                        return `Theme changed to ${theme.toUpperCase()}`;
+                    }
+                    return "Invalid theme. Available: cyan, green, orange, pink, red";
+                }
+            },
+            notify: {
+                desc: "Test notification",
+                action: (args) => {
+                    const msg = args ? args.join(' ') : 'Test notification';
+                    showNotification('Test', msg);
+                    return "Notification sent";
+                }
+            },
+            chatter: {
+                desc: "Launch Chatter platform",
+                action: () => {
+                    setTimeout(() => launchChatter(), 100);
+                    return "Launching Chatter...";
+                }
+            },
+            ping: {
+                desc: "Ping the server",
+                action: () => {
+                    const ms = Math.floor(Math.random() * 50) + 10;
+                    return `Pong! Latency: ${ms}ms`;
+                }
+            },
+            uuid: {
+                desc: "Generate a random UUID",
+                action: () => {
+                    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                        const r = Math.random() * 16 | 0;
+                        const v = c == 'x' ? r : (r & 0x3 | 0x8);
+                        return v.toString(16);
+                    });
+                }
+            },
+            ip: {
+                desc: "Show connection info",
+                action: () => {
+                    return `Connection: ENCRYPTED
+Protocol: TLS 1.3
+IP: 127.0.0.1 (localhost)
+Note: Real IP is masked for privacy`;
+                }
             }
         };
 
-        // Initialize
+        // ==========================================
+        // INITIALIZATION
+        // ==========================================
+
         window.onload = function() {
             loadSettings();
-            checkSession();
+            loadSlots();
+            startGlitchIntro();
         };
 
         function checkSession() {
             const saved = localStorage.getItem('anonyLoadr_session');
             const hasSeenIntro = localStorage.getItem('anonyLoadr_intro_seen');
             
-            // Reset state
             isPremium = false;
             usedKey = null;
             
             if (!hasSeenIntro) {
-                // Show intro first
                 document.getElementById('introModal').style.display = 'flex';
                 document.getElementById('loginModal').style.display = 'none';
                 document.getElementById('mainContent').style.display = 'none';
-            } else if (saved) {
-                // Has session, restore it
+            } else if (saved && settings.sessionPersist) {
                 const session = JSON.parse(saved);
                 username = session.username || 'User';
                 isPremium = session.isPremium || false;
                 usedKey = session.usedKey || null;
-                
-                // CRITICAL FIX: Always show main content for returning users with session
                 showMainContent();
             } else {
-                // No session, show login
                 document.getElementById('loginModal').style.display = 'flex';
                 document.getElementById('introModal').style.display = 'none';
                 document.getElementById('mainContent').style.display = 'none';
             }
         }
 
-        // Intro functions
+        // ==========================================
+        // INTRO FUNCTIONS
+        // ==========================================
+
         function nextIntroStep() {
             document.getElementById('step1').classList.remove('active');
             document.getElementById('step2').classList.add('active');
@@ -1054,9 +2116,7 @@
 
         function saveUsername() {
             const input = document.getElementById('usernameInput').value.trim();
-            if (input) {
-                username = input;
-            }
+            if (input) username = input;
             document.getElementById('step2').classList.remove('active');
             document.getElementById('step3').classList.add('active');
         }
@@ -1069,19 +2129,19 @@
         function finishIntro() {
             localStorage.setItem('anonyLoadr_intro_seen', 'true');
             document.getElementById('introModal').style.display = 'none';
-            
-            // After intro, show login modal (not main content directly)
             document.getElementById('loginModal').style.display = 'flex';
         }
 
         function resetIntro() {
             localStorage.removeItem('anonyLoadr_intro_seen');
-            // Don't clear session, just redo intro
             closeSettings();
             location.reload();
         }
 
-        // Auth functions
+        // ==========================================
+        // AUTH FUNCTIONS
+        // ==========================================
+
         function checkAuth() {
             const input = document.getElementById('passwordInput').value.trim();
             const errorMsg = document.getElementById('errorMsg');
@@ -1101,7 +2161,6 @@
             successMsg.style.display = 'none';
         }
 
-        // NEW: Show key prompt button handler
         function showKeyPrompt() {
             const key = prompt('Enter your premium access key:');
             if (key && key.trim()) {
@@ -1122,21 +2181,17 @@
             errorMsg.style.display = 'none';
             
             saveSession();
-            
-            // CRITICAL FIX: Re-render links immediately to unlock premium content
             renderLinks();
-            
-            // Update UI to show premium status
             updatePremiumUI();
             
             setTimeout(() => {
                 document.getElementById('loginModal').style.display = 'none';
                 document.getElementById('mainContent').style.display = 'flex';
                 logToTerminal(`Premium activated with key: ${key}`, 'success');
+                showNotification('Premium Activated', 'You now have access to all features!');
             }, 800);
         }
 
-        // NEW: Update UI elements for premium status
         function updatePremiumUI() {
             document.getElementById('userBadge').style.display = isPremium ? 'inline-block' : 'none';
             document.getElementById('systemStatus').textContent = isPremium ? 'PREMIUM_USER' : 'FREE_TIER';
@@ -1160,39 +2215,40 @@
             }));
         }
 
-        // FULL LOGOUT - clears everything
         function fullLogout() {
-            // Clear all stored data
             localStorage.removeItem('anonyLoadr_session');
             localStorage.removeItem('anonyLoadr_intro_seen');
             localStorage.removeItem('anonyLoadr_settings');
+            localStorage.removeItem('anonyLoadr_slots');
             
-            // Reset state
             isPremium = false;
             usedKey = null;
             username = 'User';
+            customSlots = [];
             
-            // Hide all content
+            // Reset initialization flags
+            cursorInitialized = false;
+            chatInitialized = false;
+            clockInitialized = false;
+            dataBarInitialized = false;
+            topStatusBarInitialized = false;
+            
             document.getElementById('mainContent').style.display = 'none';
             document.getElementById('settingsModal').style.display = 'none';
-            
-            // Show intro first (then login)
             document.getElementById('introModal').style.display = 'flex';
             
-            // Reset intro steps
             document.getElementById('step1').classList.add('active');
             document.getElementById('step2').classList.remove('active');
             document.getElementById('step3').classList.remove('active');
             document.getElementById('usernameInput').value = '';
         }
 
-        // Backward compatible logout (redirects to full logout)
         function logout() {
             fullLogout();
         }
 
         function clearAllData() {
-            if (confirm('⚠ WARNING: This will erase EVERYTHING including username, settings, and session. Continue?')) {
+            if (confirm('⚠ WARNING: This will erase EVERYTHING including username, settings, slots, and session. Continue?')) {
                 localStorage.clear();
                 location.reload();
             }
@@ -1204,13 +2260,17 @@
             
             document.getElementById('userDisplayName').textContent = username;
             document.getElementById('greeting').textContent = `Hello, ${username}!`;
+            document.getElementById('topBarUsername').textContent = username;
             
             updatePremiumUI();
-            
             initApp();
+            initTopStatusBar();
         }
 
-        // Cloaking function
+        // ==========================================
+        // CLOAKING
+        // ==========================================
+
         function cloakOpen(url, name) {
             if (!settings.autoCloak) {
                 window.open(url, '_blank');
@@ -1238,34 +2298,79 @@
                 </html>
             `);
             win.document.close();
+            
+            showNotification('Link Cloaked', `${name} opened in cloaked window`);
         }
 
-        // Settings functions
+        // ==========================================
+        // SETTINGS
+        // ==========================================
+
         function loadSettings() {
             const saved = localStorage.getItem('anonyLoadr_settings');
             if (saved) {
-                settings = JSON.parse(saved);
+                settings = { ...settings, ...JSON.parse(saved) };
             }
-            // Apply toggles
-            document.getElementById('autoCloakToggle').checked = settings.autoCloak;
-            document.getElementById('cursorToggle').checked = settings.customCursor;
-            document.getElementById('effectsToggle').checked = settings.bgEffects;
-            document.getElementById('scanlinesToggle').checked = settings.scanlines;
-            document.getElementById('soundsToggle').checked = settings.terminalSounds;
+            
+            // Set toggle values
+            const toggles = {
+                'autoCloakToggle': 'autoCloak',
+                'cursorToggle': 'customCursor',
+                'effectsToggle': 'bgEffects',
+                'scanlinesToggle': 'scanlines',
+                'soundsToggle': 'terminalSounds',
+                'notificationsToggle': 'notifications',
+                'sessionPersistToggle': 'sessionPersist',
+                'devModeToggle': 'devMode',
+                'cornerAccentsToggle': 'cornerAccents',
+                'floatingIconsToggle': 'floatingIcons',
+                'dataBarToggle': 'dataBar',
+                'keyboardHintToggle': 'keyboardHint'
+            };
+            
+            for (const [id, key] of Object.entries(toggles)) {
+                const el = document.getElementById(id);
+                if (el) el.checked = settings[key];
+            }
+            
+            // Set select values
+            if (settings.animationSpeed) {
+                document.getElementById('animationSpeed').value = settings.animationSpeed;
+            }
+            if (settings.particleDensity) {
+                document.getElementById('particleDensity').value = settings.particleDensity;
+            }
+            
+            // Set weather inputs
+            if (settings.weatherApiKey) {
+                document.getElementById('weatherApiKey').value = settings.weatherApiKey;
+            }
+            if (settings.weatherLocation) {
+                document.getElementById('weatherLocation').value = settings.weatherLocation;
+            }
+            
+            applySettings();
         }
 
         function saveSettings() {
             localStorage.setItem('anonyLoadr_settings', JSON.stringify(settings));
         }
 
-        function toggleSetting(key) {
-            settings[key] = !settings[key];
+        function toggleSetting(key, value) {
+            if (value !== undefined) {
+                settings[key] = value;
+            } else {
+                settings[key] = !settings[key];
+            }
             saveSettings();
             applySettings();
+            
+            if (key === 'particleDensity') {
+                initParticles();
+            }
         }
 
         function applySettings() {
-            // Cursor
             const cursors = document.querySelectorAll('.cursor, .cursor-follower');
             const body = document.body;
             
@@ -1277,13 +2382,75 @@
                 cursors.forEach(c => c.style.display = 'none');
             }
             
-            // Background effects
             const particles = document.getElementById('particles');
             if (particles) particles.style.display = settings.bgEffects ? 'block' : 'none';
             
-            // Scanlines
             const scanlines = document.querySelector('.scanlines');
             if (scanlines) scanlines.style.opacity = settings.scanlines ? '0.3' : '0';
+            
+            // Corner accents
+            document.querySelectorAll('.corner-accent').forEach(el => {
+                el.style.display = settings.cornerAccents ? 'block' : 'none';
+            });
+            
+            // Floating icons
+            document.querySelectorAll('.floating-icon').forEach(el => {
+                el.style.display = settings.floatingIcons ? 'block' : 'none';
+            });
+            
+            // Data bar
+            const dataBar = document.getElementById('dataBar');
+            if (dataBar) dataBar.style.display = settings.dataBar ? 'block' : 'none';
+            
+            // Keyboard hint
+            const keyboardHint = document.getElementById('keyboardHint');
+            if (keyboardHint) keyboardHint.style.display = settings.keyboardHint ? 'block' : 'none';
+            
+            // Top status bar visibility based on setting
+            const topStatusBar = document.getElementById('topStatusBar');
+            if (topStatusBar) {
+                topStatusBar.style.display = 'flex';
+            }
+        }
+
+        function setTheme(theme) {
+            if (!CONFIG.THEMES[theme]) return;
+            
+            currentTheme = theme;
+            const colors = CONFIG.THEMES[theme];
+            const root = document.documentElement;
+            
+            root.style.setProperty('--primary', colors.primary);
+            root.style.setProperty('--secondary', colors.secondary);
+            root.style.setProperty('--accent', colors.accent);
+            
+            document.querySelectorAll('.theme-preview').forEach(el => el.classList.remove('active'));
+            document.querySelector(`.theme-${theme}`)?.classList.add('active');
+            
+            settings.theme = theme;
+            saveSettings();
+            showNotification('Theme Updated', `Switched to ${theme} theme`);
+        }
+
+        function switchSettingsTab(tab, clickedBtn) {
+            const settingsModal = document.getElementById('settingsModal');
+            const tabContainer = (clickedBtn || event.target).closest('.tab-buttons');
+            
+            // Remove active from buttons in settings only
+            tabContainer.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Add active to clicked
+            (clickedBtn || event.target).classList.add('active');
+            
+            // Hide all tab contents in settings
+            settingsModal.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Show selected
+            document.getElementById(`tab-${tab}`).classList.add('active');
         }
 
         function openSettings() {
@@ -1294,13 +2461,342 @@
             document.getElementById('settingsModal').style.display = 'none';
         }
 
-        // Terminal functions
+        function exportData() {
+            const data = {
+                settings: settings,
+                slots: customSlots,
+                theme: currentTheme,
+                exportedAt: new Date().toISOString()
+            };
+            
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `anonyloadr-backup-${Date.now()}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            showNotification('Export Complete', 'Your data has been downloaded');
+        }
+
+        function importData(input) {
+            const file = input.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    
+                    if (data.settings) {
+                        settings = { ...settings, ...data.settings };
+                        saveSettings();
+                        loadSettings();
+                    }
+                    
+                    if (data.slots) {
+                        customSlots = data.slots;
+                        saveSlots();
+                        renderSlots();
+                    }
+                    
+                    if (data.theme) {
+                        setTheme(data.theme);
+                    }
+                    
+                    showNotification('Import Complete', 'Your data has been restored');
+                    setTimeout(() => location.reload(), 1000);
+                } catch (err) {
+                    showNotification('Import Failed', 'Invalid backup file', 'error');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // ==========================================
+        // SITE SLOTS
+        // ==========================================
+
+        function loadSlots() {
+            const saved = localStorage.getItem('anonyLoadr_slots');
+            if (saved) {
+                customSlots = JSON.parse(saved);
+            }
+        }
+
+        function saveSlots() {
+            localStorage.setItem('anonyLoadr_slots', JSON.stringify(customSlots));
+        }
+
+        function renderSlots() {
+            const grid = document.getElementById('slotsGrid');
+            grid.innerHTML = `
+                <div class="slot-card p-8 rounded-xl text-center cursor-pointer" onclick="openSlotModal()">
+                    <div class="text-5xl mb-4">+</div>
+                    <h4 class="text-lg font-bold text-cyan-400">Add New Site</h4>
+                    <p class="text-sm text-gray-400 mt-2">Click to add a custom site slot</p>
+                </div>
+            `;
+            
+            customSlots.forEach((slot, index) => {
+                const card = document.createElement('div');
+                card.className = 'slot-card occupied p-6 rounded-xl cursor-pointer relative group';
+                card.innerHTML = `
+                    <button onclick="event.stopPropagation(); deleteSlot(${index})" 
+                        class="absolute top-2 right-2 w-6 h-6 bg-red-500/20 text-red-400 rounded-full 
+                        opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-xs">×</button>
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="icon-wrapper text-white/70 group-hover:text-green-400 transition-colors">
+                            <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zM17.9 14.24c.2.81-.26 1.64-1.04 2.02-.78.38-1.7.14-2.2-.56-.5-.7-.43-1.65.17-2.27.6-.62 1.55-.73 2.27-.27.72.46 1.03 1.28.8 2.08z"/></svg>
+                        </div>
+                        <div class="text-xs text-white/30 font-mono group-hover:text-green-400/70 transition-colors">
+                            [S${String(index + 1).padStart(2, '0')}]
+                        </div>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2 group-hover:text-green-400 transition-colors">${slot.name}</h3>
+                    <p class="text-sm text-gray-400 group-hover:text-gray-300">${slot.desc || 'Custom site slot'}</p>
+                    <div class="mt-4 flex items-center gap-2 text-xs text-white/20 group-hover:text-green-400/60 transition-colors">
+                        <span class="w-1.5 h-1.5 rounded-full bg-current animate-pulse"></span>
+                        <span class="font-mono">SAVED</span>
+                    </div>
+                `;
+                card.addEventListener('click', () => cloakOpen(slot.url, slot.name));
+                grid.appendChild(card);
+            });
+        }
+
+        function openSlotModal() {
+            document.getElementById('slotModal').style.display = 'flex';
+            setTimeout(() => document.getElementById('slotName').focus(), 100);
+        }
+
+        function closeSlotModal() {
+            document.getElementById('slotModal').style.display = 'none';
+            document.getElementById('slotName').value = '';
+            document.getElementById('slotUrl').value = '';
+            document.getElementById('slotDesc').value = '';
+        }
+
+        function saveSlot() {
+            const name = document.getElementById('slotName').value.trim();
+            const url = document.getElementById('slotUrl').value.trim();
+            const desc = document.getElementById('slotDesc').value.trim();
+            
+            if (!name || !url) {
+                showNotification('Error', 'Name and URL are required', 'error');
+                return;
+            }
+            
+            if (!url.startsWith('http')) {
+                showNotification('Error', 'URL must start with http:// or https://', 'error');
+                return;
+            }
+            
+            customSlots.push({ name, url, desc, addedAt: Date.now() });
+            saveSlots();
+            renderSlots();
+            closeSlotModal();
+            showNotification('Site Added', `${name} has been added to your slots`);
+            logToTerminal(`Added custom slot: ${name}`, 'success');
+        }
+
+        function deleteSlot(index) {
+            if (confirm('Delete this site slot?')) {
+                const name = customSlots[index].name;
+                customSlots.splice(index, 1);
+                saveSlots();
+                renderSlots();
+                showNotification('Site Removed', `${name} has been removed`);
+            }
+        }
+
+        // ==========================================
+        // CHATTER
+        // ==========================================
+
+        function launchChatter() {
+            const modal = document.getElementById('chatterLaunchModal');
+            const status = document.getElementById('chatterLaunchStatus');
+            
+            modal.style.display = 'flex';
+            
+            const steps = [
+                'Establishing connection...',
+                'Verifying identity...',
+                'Loading channels...',
+                'Connecting to Chatter...'
+            ];
+            
+            let i = 0;
+            const interval = setInterval(() => {
+                if (i < steps.length) {
+                    status.textContent = steps[i];
+                    i++;
+                } else {
+                    clearInterval(interval);
+                    
+                    // Open cloaked
+                    setTimeout(() => {
+                        modal.style.display = 'none';
+                        cloakOpen(CONFIG.CHATTER_URL, 'Chatter');
+                    }, 500);
+                }
+            }, 600);
+        }
+
+        function simulateChat() {
+            if (chatInitialized) return;
+            chatInitialized = true;
+            
+            const container = document.getElementById('chatSimulation');
+            if (!container) return;
+            
+            setInterval(() => {
+                // Only animate if the Chatter tab is visible
+                const chatterTab = document.getElementById('main-tab-chatter');
+                if (!chatterTab || !chatterTab.classList.contains('active')) return;
+                
+                if (Math.random() > 0.7 && container.children.length < 10) {
+                    const msg = CONFIG.CHAT_MESSAGES[Math.floor(Math.random() * CONFIG.CHAT_MESSAGES.length)];
+                    const messageEl = document.createElement('div');
+                    messageEl.className = 'chat-message';
+                    messageEl.innerHTML = `
+                        <div class="chat-avatar" style="background: ${msg.color}">${msg.user[0]}</div>
+                        <div class="chat-content">
+                            <div class="chat-username" style="color: ${msg.color}">${msg.user}</div>
+                            <div class="chat-text">${msg.msg}</div>
+                        </div>
+                        <div class="chat-time">${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
+                    `;
+                    container.appendChild(messageEl);
+                    
+                    if (container.children.length > 8) {
+                        container.removeChild(container.children[1]);
+                    }
+                }
+                
+                // Update online users
+                const onlineEl = document.getElementById('onlineUsers');
+                if (onlineEl) {
+                    const current = parseInt(onlineEl.textContent.replace(',', ''));
+                    const change = Math.floor(Math.random() * 10) - 5;
+                    const newValue = Math.max(2000, Math.min(5000, current + change));
+                    onlineEl.textContent = newValue.toLocaleString();
+                }
+            }, 3000);
+        }
+
+        // ==========================================
+        // TOOLS
+        // ==========================================
+
+        function cloakCustomUrl() {
+            const url = document.getElementById('cloakUrlInput').value.trim();
+            if (!url) {
+                showNotification('Error', 'Please enter a URL', 'error');
+                return;
+            }
+            if (!url.startsWith('http')) {
+                showNotification('Error', 'URL must start with http:// or https://', 'error');
+                return;
+            }
+            cloakOpen(url, 'Custom');
+        }
+
+        function base64Encode() {
+            const input = document.getElementById('base64Input').value;
+            const result = document.getElementById('base64Result');
+            if (!input) return;
+            
+            result.textContent = btoa(input);
+            result.classList.remove('hidden');
+        }
+
+        function base64Decode() {
+            const input = document.getElementById('base64Input').value;
+            const result = document.getElementById('base64Result');
+            if (!input) return;
+            
+            try {
+                result.textContent = atob(input);
+                result.classList.remove('hidden');
+            } catch (e) {
+                result.textContent = 'Invalid Base64 string';
+                result.classList.remove('hidden');
+            }
+        }
+
+        function generatePassword() {
+            const length = parseInt(document.getElementById('passLength').value);
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
+            let password = '';
+            
+            for (let i = 0; i < length; i++) {
+                password += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            
+            const result = document.getElementById('passwordResult');
+            result.textContent = password;
+            result.classList.remove('hidden');
+        }
+
+        function generateQR() {
+            const input = document.getElementById('qrInput').value.trim();
+            if (!input) {
+                showNotification('Error', 'Please enter text or URL', 'error');
+                return;
+            }
+            
+            const img = document.getElementById('qrImage');
+            img.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(input)}`;
+            document.getElementById('qrResult').classList.remove('hidden');
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                showNotification('Copied', 'Text copied to clipboard');
+            });
+        }
+
+        // ==========================================
+        // TABS
+        // ==========================================
+
+        function switchMainTab(tab, clickedBtn) {
+            // Get the parent tab-buttons container
+            const tabContainer = (clickedBtn || event.target).closest('.tab-buttons');
+            
+            // Remove active from all buttons in this container only
+            tabContainer.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Add active to clicked button
+            (clickedBtn || event.target).classList.add('active');
+            
+            // Hide all tab contents in main
+            document.querySelectorAll('main > .tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Show selected tab
+            document.getElementById(`main-tab-${tab}`).classList.add('active');
+            
+            if (tab === 'slots') {
+                renderSlots();
+            }
+        }
+
+        // ==========================================
+        // TERMINAL
+        // ==========================================
+
         function initTerminal() {
             const input = document.getElementById('terminalInput');
             const output = document.getElementById('terminalOutput');
             
-            // Welcome message
-            output.innerHTML = `<div class="command-output command-info">Welcome to anonyLoadr Console v2.0</div>`;
+            output.innerHTML = `<div class="command-output command-info">Welcome to anonyLoadr Console v3.0</div>`;
             output.innerHTML += `<div class="command-output">Type 'help' to see available commands.</div>`;
             
             input.addEventListener('keydown', function(e) {
@@ -1311,7 +2807,6 @@
                         this.value = '';
                     }
                 }
-                // Tab completion
                 if (e.key === 'Tab') {
                     e.preventDefault();
                     const partial = this.value.toLowerCase();
@@ -1322,7 +2817,6 @@
                 }
             });
             
-            // Focus terminal when clicking anywhere in terminal container
             document.querySelector('.terminal-container').addEventListener('click', () => {
                 input.focus();
             });
@@ -1335,13 +2829,11 @@
             const args = input.split(' ');
             const cmd = args.shift().toLowerCase();
             
-            // Echo command
             const echoLine = document.createElement('div');
             echoLine.className = 'command-output';
             echoLine.innerHTML = `<span class="text-cyan-400">root@anonyLoadr:~$</span> ${input}`;
             output.appendChild(echoLine);
             
-            // Execute
             if (COMMANDS[cmd]) {
                 const result = COMMANDS[cmd].action(args);
                 if (result) {
@@ -1372,7 +2864,31 @@
             output.scrollTop = output.scrollHeight;
         }
 
-        // App initialization
+        // ==========================================
+        // NOTIFICATIONS
+        // ==========================================
+
+        function showNotification(title, message, type = 'info') {
+            const container = document.getElementById('notificationContainer');
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `
+                <div class="notification-title">${title}</div>
+                <div class="notification-message">${message}</div>
+            `;
+            container.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                notification.style.transform = 'translateX(100%)';
+                setTimeout(() => notification.remove(), 300);
+            }, 4000);
+        }
+
+        // ==========================================
+        // APP INITIALIZATION
+        // ==========================================
+
         function initApp() {
             renderLinks();
             initCursor();
@@ -1380,6 +2896,251 @@
             startClock();
             initTerminal();
             applySettings();
+            simulateChat();
+            initDataBar();
+            
+            if (settings.theme) {
+                setTheme(settings.theme);
+            }
+            
+            // Dashboard launch notifications
+            setTimeout(() => {
+                showNotification('System', 'Browser environment cloaked successfully', 'success');
+            }, 800);
+            
+            setTimeout(() => {
+                showNotification('Security', 'Chromebook spoofed! User-Agent masked.', 'success');
+            }, 1800);
+            
+            setTimeout(() => {
+                showNotification('Network', 'Encrypted connection established', 'success');
+            }, 2800);
+            
+            if (isPremium) {
+                setTimeout(() => {
+                    showNotification('Premium', 'All features unlocked', 'success');
+                }, 3800);
+            }
+        }
+
+        // ==========================================
+        // TOP STATUS BAR & WEATHER
+        // ==========================================
+
+        let topStatusBarInitialized = false;
+        function initTopStatusBar() {
+            if (topStatusBarInitialized) return;
+            topStatusBarInitialized = true;
+            
+            updateTopBarTime();
+            setInterval(updateTopBarTime, 1000);
+            fetchWeather();
+            // Refresh weather every 10 minutes
+            setInterval(fetchWeather, 600000);
+        }
+
+        function updateTopBarTime() {
+            const now = new Date();
+            document.getElementById('topBarTime').textContent = now.toLocaleTimeString('en-US', {
+                hour12: false,
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            document.getElementById('topBarDate').textContent = now.toLocaleDateString('en-US', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            });
+        }
+
+        // Demo weather data for when API fails
+        const DEMO_WEATHER = {
+            'London': { temp: 12, desc: 'Light rain', icon: '10d' },
+            'New York': { temp: 18, desc: 'Clear sky', icon: '01d' },
+            'Los Angeles': { temp: 24, desc: 'Sunny', icon: '01d' },
+            'Tokyo': { temp: 20, desc: 'Cloudy', icon: '03d' },
+            'Paris': { temp: 15, desc: 'Partly cloudy', icon: '02d' },
+            'Sydney': { temp: 22, desc: 'Clear sky', icon: '01d' },
+            'Berlin': { temp: 14, desc: 'Overcast', icon: '04d' },
+            'Moscow': { temp: 8, desc: 'Snow', icon: '13d' },
+            'Dubai': { temp: 35, desc: 'Sunny', icon: '01d' },
+            'Singapore': { temp: 30, desc: 'Thunderstorm', icon: '11d' }
+        };
+        let useDemoMode = false;
+
+        async function fetchWeather() {
+            const apiKey = settings.weatherApiKey;
+            const location = settings.weatherLocation || 'London';
+            
+            // If demo mode or no API key, use demo data
+            if (useDemoMode || !apiKey) {
+                applyDemoWeather(location);
+                return;
+            }
+            
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 5000);
+                
+                const response = await fetch(
+                    `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(location)}&appid=${apiKey}&units=metric`,
+                    { signal: controller.signal }
+                );
+                clearTimeout(timeoutId);
+                
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        throw new Error('Invalid API key');
+                    }
+                    throw new Error('Location not found');
+                }
+                
+                const data = await response.json();
+                const temp = Math.round(data.main.temp);
+                const desc = data.weather[0].description;
+                const iconCode = data.weather[0].icon;
+                
+                document.getElementById('weatherTemp').textContent = `${temp}°C`;
+                document.getElementById('weatherDesc').textContent = desc.charAt(0).toUpperCase() + desc.slice(1);
+                updateWeatherIcon(iconCode);
+                
+            } catch (err) {
+                console.log('Weather API error:', err.message);
+                // Fall back to demo mode
+                applyDemoWeather(location);
+            }
+        }
+
+        function applyDemoWeather(location) {
+            // Try to find matching city or use random
+            let weather = null;
+            for (const city in DEMO_WEATHER) {
+                if (location.toLowerCase().includes(city.toLowerCase())) {
+                    weather = DEMO_WEATHER[city];
+                    break;
+                }
+            }
+            
+            // If no match, pick random
+            if (!weather) {
+                const cities = Object.keys(DEMO_WEATHER);
+                weather = DEMO_WEATHER[cities[Math.floor(Math.random() * cities.length)]];
+            }
+            
+            document.getElementById('weatherTemp').textContent = `${weather.temp}°C`;
+            document.getElementById('weatherDesc').textContent = weather.desc + (useDemoMode ? '' : ' (Demo)');
+            updateWeatherIcon(weather.icon);
+        }
+
+        function useDemoWeather() {
+            useDemoMode = true;
+            fetchWeather();
+            showNotification('Demo Mode', 'Using sample weather data');
+        }
+
+        function updateWeatherIcon(iconCode) {
+            // SVG icons for different weather conditions
+            const icons = {
+                '01d': '<circle cx="12" cy="12" r="5" fill="var(--primary)"/><path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="var(--primary)" stroke-width="2" fill="none"/>',
+                '01n': '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" fill="var(--primary)"/>',
+                '02d': '<circle cx="12" cy="12" r="5" fill="var(--primary)"/><path d="M17 18a5 5 0 0 0 0-10 6 6 0 0 0-12 0 5 5 0 0 0 0 10h12z" fill="rgba(255,255,255,0.3)"/>',
+                '02n': '<path d="M17 18a5 5 0 0 0 0-10 6 6 0 0 0-12 0 5 5 0 0 0 0 10h12z" fill="rgba(255,255,255,0.3)"/><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" fill="var(--primary)"/>',
+                '03d': '<path d="M17 18a5 5 0 0 0 0-10 6 6 0 0 0-12 0 5 5 0 0 0 0 10h12z" fill="rgba(255,255,255,0.5)"/>',
+                '03n': '<path d="M17 18a5 5 0 0 0 0-10 6 6 0 0 0-12 0 5 5 0 0 0 0 10h12z" fill="rgba(255,255,255,0.5)"/>',
+                '04d': '<path d="M17 18a5 5 0 0 0 0-10 6 6 0 0 0-12 0 5 5 0 0 0 0 10h12z" fill="rgba(255,255,255,0.7)"/>',
+                '04n': '<path d="M17 18a5 5 0 0 0 0-10 6 6 0 0 0-12 0 5 5 0 0 0 0 10h12z" fill="rgba(255,255,255,0.7)"/>',
+                '09d': '<path d="M17 18a5 5 0 0 0 0-10 6 6 0 0 0-12 0 5 5 0 0 0 0 10h12z" fill="rgba(255,255,255,0.5)"/><path d="M8 20v2M12 20v2M16 20v2" stroke="var(--primary)" stroke-width="2"/>',
+                '09n': '<path d="M17 18a5 5 0 0 0 0-10 6 6 0 0 0-12 0 5 5 0 0 0 0 10h12z" fill="rgba(255,255,255,0.5)"/><path d="M8 20v2M12 20v2M16 20v2" stroke="var(--primary)" stroke-width="2"/>',
+                '10d': '<circle cx="12" cy="12" r="5" fill="var(--primary)"/><path d="M17 18a5 5 0 0 0 0-10 6 6 0 0 0-12 0 5 5 0 0 0 0 10h12z" fill="rgba(255,255,255,0.3)"/><path d="M8 20v2M12 20v2M16 20v2" stroke="var(--primary)" stroke-width="2"/>',
+                '10n': '<path d="M17 18a5 5 0 0 0 0-10 6 6 0 0 0-12 0 5 5 0 0 0 0 10h12z" fill="rgba(255,255,255,0.5)"/><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" fill="var(--primary)"/><path d="M8 20v2M12 20v2M16 20v2" stroke="var(--primary)" stroke-width="2"/>',
+                '11d': '<path d="M17 18a5 5 0 0 0 0-10 6 6 0 0 0-12 0 5 5 0 0 0 0 10h12z" fill="rgba(255,255,255,0.5)"/><path d="M11 16l-2 4h3l-1 3" stroke="var(--accent)" stroke-width="2" fill="none"/>',
+                '11n': '<path d="M17 18a5 5 0 0 0 0-10 6 6 0 0 0-12 0 5 5 0 0 0 0 10h12z" fill="rgba(255,255,255,0.5)"/><path d="M11 16l-2 4h3l-1 3" stroke="var(--accent)" stroke-width="2" fill="none"/>',
+                '13d': '<path d="M17 18a5 5 0 0 0 0-10 6 6 0 0 0-12 0 5 5 0 0 0 0 10h12z" fill="rgba(255,255,255,0.8)"/><circle cx="8" cy="21" r="1" fill="var(--primary)"/><circle cx="12" cy="21" r="1" fill="var(--primary)"/><circle cx="16" cy="21" r="1" fill="var(--primary)"/>',
+                '13n': '<path d="M17 18a5 5 0 0 0 0-10 6 6 0 0 0-12 0 5 5 0 0 0 0 10h12z" fill="rgba(255,255,255,0.8)"/><circle cx="8" cy="21" r="1" fill="var(--primary)"/><circle cx="12" cy="21" r="1" fill="var(--primary)"/><circle cx="16" cy="21" r="1" fill="var(--primary)"/>',
+                '50d': '<path d="M4 14h16M4 18h16M4 10h16" stroke="rgba(255,255,255,0.5)" stroke-width="2" stroke-linecap="round"/>',
+                '50n': '<path d="M4 14h16M4 18h16M4 10h16" stroke="rgba(255,255,255,0.5)" stroke-width="2" stroke-linecap="round"/>'
+            };
+            
+            const iconSvg = document.getElementById('weatherIcon');
+            iconSvg.innerHTML = icons[iconCode] || icons['01d'];
+        }
+
+        async function testWeatherApi() {
+            const apiKey = document.getElementById('weatherApiKey').value;
+            const location = document.getElementById('weatherLocation').value || 'London';
+            
+            if (!apiKey) {
+                showNotification('Error', 'Please enter an API key first', 'error');
+                return;
+            }
+            
+            showNotification('Testing', 'Testing API connection...');
+            
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 5000);
+                
+                const response = await fetch(
+                    `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(location)}&appid=${apiKey}&units=metric`,
+                    { signal: controller.signal }
+                );
+                clearTimeout(timeoutId);
+                
+                if (response.ok) {
+                    useDemoMode = false;
+                    showNotification('Success', 'API key is valid!');
+                    toggleSetting('weatherApiKey', apiKey);
+                    toggleSetting('weatherLocation', location);
+                    fetchWeather();
+                } else {
+                    const data = await response.json();
+                    showNotification('Error', data.message || 'Invalid API key or location', 'error');
+                }
+            } catch (err) {
+                if (err.name === 'AbortError') {
+                    showNotification('Error', 'Request timed out. API may be blocked by CORS.', 'error');
+                } else {
+                    showNotification('Error', 'CORS error or network issue. Try Demo Mode.', 'error');
+                }
+            }
+        }
+
+        let dataBarInitialized = false;
+        function initDataBar() {
+            if (dataBarInitialized) return;
+            dataBarInitialized = true;
+            
+            const dataBar = document.getElementById('dataBar');
+            if (!dataBar) return;
+            
+            let width = 0;
+            let direction = 1;
+            let lastTime = 0;
+            
+            function animateDataBar(timestamp) {
+                if (!settings.dataBar) {
+                    requestAnimationFrame(animateDataBar);
+                    return;
+                }
+                
+                if (timestamp - lastTime > 30) {
+                    width += direction * 1.5;
+                    if (width >= 100) {
+                        width = 100;
+                        direction = -1;
+                    } else if (width <= 0) {
+                        width = 0;
+                        direction = 1;
+                    }
+                    dataBar.style.width = width + '%';
+                    lastTime = timestamp;
+                }
+                
+                requestAnimationFrame(animateDataBar);
+            }
+            
+            requestAnimationFrame(animateDataBar);
         }
 
         function renderLinks() {
@@ -1437,44 +3198,80 @@
             grid.appendChild(card);
         }
 
+        // Cursor state to prevent multiple initializations
+        let cursorInitialized = false;
+        let cursorObserver = null;
+        let chatInitialized = false;
+        let clockInitialized = false;
+
         function initCursor() {
+            if (cursorInitialized) return;
+            cursorInitialized = true;
+            
             const cursor = document.querySelector('.cursor');
             const follower = document.querySelector('.cursor-follower');
             
             if (window.matchMedia('(pointer: coarse)').matches) return;
+            if (!cursor || !follower) return;
+
+            let mouseX = 0, mouseY = 0;
+            let followerX = 0, followerY = 0;
+            let rafId = null;
+            let isMoving = false;
+            let moveTimeout = null;
+
+            // Use requestAnimationFrame for smooth cursor following
+            function updateCursor() {
+                cursor.style.left = mouseX - 10 + 'px';
+                cursor.style.top = mouseY - 10 + 'px';
+                
+                // Smooth follower with lerp
+                followerX += (mouseX - 20 - followerX) * 0.15;
+                followerY += (mouseY - 20 - followerY) * 0.15;
+                follower.style.left = followerX + 'px';
+                follower.style.top = followerY + 'px';
+                
+                if (isMoving) {
+                    rafId = requestAnimationFrame(updateCursor);
+                }
+            }
 
             document.addEventListener('mousemove', (e) => {
-                cursor.style.left = e.clientX - 10 + 'px';
-                cursor.style.top = e.clientY - 10 + 'px';
+                mouseX = e.clientX;
+                mouseY = e.clientY;
                 
-                setTimeout(() => {
-                    follower.style.left = e.clientX - 20 + 'px';
-                    follower.style.top = e.clientY - 20 + 'px';
+                if (!isMoving) {
+                    isMoving = true;
+                    updateCursor();
+                }
+                
+                clearTimeout(moveTimeout);
+                moveTimeout = setTimeout(() => {
+                    isMoving = false;
+                    if (rafId) cancelAnimationFrame(rafId);
                 }, 100);
-            });
+            }, { passive: true });
 
-            // Add hover effect to all interactive elements
-            const interactiveElements = 'button, a, .link-card:not(.locked), input, .toggle-slider, .intro-btn, .login-btn, .skip-btn, .skip-intro, .enter-key-btn';
-            document.querySelectorAll(interactiveElements).forEach(el => {
-                el.addEventListener('mouseenter', () => cursor.classList.add('hover'));
-                el.addEventListener('mouseleave', () => cursor.classList.remove('hover'));
+            // Event delegation for hover effects - more efficient
+            document.addEventListener('mouseover', (e) => {
+                const target = e.target.closest('button, a, .link-card:not(.locked), input, .toggle-slider, .intro-btn, .modal-btn, .skip-intro, .slot-card');
+                if (target) cursor.classList.add('hover');
             });
             
-            // Re-apply when DOM changes
-            const observer = new MutationObserver(() => {
-                document.querySelectorAll(interactiveElements).forEach(el => {
-                    el.removeEventListener('mouseenter', () => cursor.classList.add('hover'));
-                    el.removeEventListener('mouseleave', () => cursor.classList.remove('hover'));
-                    el.addEventListener('mouseenter', () => cursor.classList.add('hover'));
-                    el.addEventListener('mouseleave', () => cursor.classList.remove('hover'));
-                });
+            document.addEventListener('mouseout', (e) => {
+                const target = e.target.closest('button, a, .link-card:not(.locked), input, .toggle-slider, .intro-btn, .modal-btn, .skip-intro, .slot-card');
+                if (target) cursor.classList.remove('hover');
             });
-            observer.observe(document.body, { childList: true, subtree: true });
         }
 
         function initParticles() {
             const container = document.getElementById('particles');
-            for (let i = 0; i < 20; i++) {
+            container.innerHTML = '';
+            
+            const densities = { none: 0, low: 10, medium: 20, high: 40 };
+            const count = densities[settings.particleDensity] || 20;
+            
+            for (let i = 0; i < count; i++) {
                 const particle = document.createElement('div');
                 particle.className = 'particle';
                 particle.style.left = Math.random() * 100 + '%';
@@ -1485,18 +3282,25 @@
         }
 
         function startClock() {
+            if (clockInitialized) return;
+            clockInitialized = true;
+            
             const clock = document.getElementById('clock');
-            setInterval(() => {
+            if (!clock) return;
+            
+            function update() {
                 clock.textContent = new Date().toLocaleTimeString('en-US', { 
                     hour12: false, 
                     hour: '2-digit', 
                     minute: '2-digit', 
                     second: '2-digit' 
                 });
-            }, 1000);
+                requestAnimationFrame(() => setTimeout(update, 1000));
+            }
+            update();
         }
 
-        // Event listeners
+        // Event Listeners
         document.getElementById('passwordInput')?.addEventListener('keypress', function(e) {
             if (e.key === 'Enter') checkAuth();
         });
@@ -1505,12 +3309,49 @@
             if (e.key === 'Enter') saveUsername();
         });
 
-        // Close modals on outside click
+        document.getElementById('slotUrl')?.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') saveSlot();
+        });
+
         window.onclick = function(event) {
-            const settingsModal = document.getElementById('settingsModal');
-            if (event.target === settingsModal) {
-                closeSettings();
+            if (event.target.classList.contains('modal-overlay')) {
+                event.target.style.display = 'none';
             }
+        }
+
+        // Keyboard Shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Ctrl/Cmd + K to focus terminal
+            if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                e.preventDefault();
+                document.getElementById('terminalInput')?.focus();
+            }
+            
+            // Escape to close modals
+            if (e.key === 'Escape') {
+                document.querySelectorAll('.modal-overlay').forEach(modal => {
+                    if (modal.id !== 'glitchIntro' && modal.id !== 'introModal' && modal.id !== 'loginModal') {
+                        modal.style.display = 'none';
+                    }
+                });
+            }
+            
+            // Ctrl/Cmd + , for settings
+            if ((e.ctrlKey || e.metaKey) && e.key === ',') {
+                e.preventDefault();
+                openSettings();
+            }
+            
+            // Ctrl/Cmd + / to show help
+            if ((e.ctrlKey || e.metaKey) && e.key === '/') {
+                e.preventDefault();
+                executeCommand('help');
+            }
+        });
+
+        // Hide keyboard hint on mobile
+        if (window.matchMedia('(pointer: coarse)').matches) {
+            document.getElementById('keyboardHint').style.display = 'none';
         }
     </script>
 </body>
