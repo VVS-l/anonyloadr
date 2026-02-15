@@ -834,7 +834,6 @@
             position: fixed;
             top: 50%;
             left: 50%;
-            transform: translate(-50%, -50%);
             width: 600px;
             max-width: 90vw;
             background: linear-gradient(135deg, #0a0a0f 0%, #151520 100%);
@@ -848,9 +847,46 @@
             overflow: hidden;
             font-family: 'JetBrains Mono', monospace;
             display: none;
+            will-change: transform, opacity;
+            /* Use margin for centering instead of transform */
+            margin-left: -300px;
+            margin-top: -200px;
+        }
+        @media (max-width: 640px) {
+            .cyber-browser {
+                margin-left: -45vw;
+                margin-top: -150px;
+            }
+        }
+        .cyber-browser.animate-in {
+            animation: browserIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+        .cyber-browser.animate-out {
+            animation: browserOut 0.3s cubic-bezier(0.4, 0, 1, 1) forwards;
+        }
+        @keyframes browserIn {
+            from { 
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to { 
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        @keyframes browserOut {
+            from { 
+                opacity: 1;
+                transform: scale(1);
+            }
+            to { 
+                opacity: 0;
+                transform: scale(0.9);
+            }
         }
         .cyber-browser.dragging {
-            opacity: 0.9;
+            opacity: 0.95;
+            transition: none !important;
             box-shadow: 
                 0 0 80px rgba(0, 240, 255, 0.4),
                 0 0 120px rgba(0, 240, 255, 0.15),
@@ -1004,6 +1040,7 @@
             background: linear-gradient(90deg, transparent, var(--primary), transparent);
             animation: scanline 3s linear infinite;
             pointer-events: none;
+            z-index: 1;
         }
         @keyframes scanline {
             0% { transform: translateY(0); opacity: 0; }
@@ -2570,7 +2607,29 @@ Note: Real IP is masked for privacy`;
                 username = session.username || 'User';
                 isPremium = session.isPremium || false;
                 usedKey = session.usedKey || null;
-                showMainContent();
+                
+                // Check if we need reload BEFORE showing dashboard
+                if (checkReloadNeeded()) {
+                    // Need to reload - show reload modal instead of dashboard
+                    document.getElementById('mainContent').style.display = 'none';
+                    document.getElementById('loginModal').style.display = 'none';
+                    document.getElementById('introModal').style.display = 'none';
+                    
+                    // Small delay to let things settle
+                    setTimeout(() => {
+                        document.getElementById('reloadModal').style.display = 'flex';
+                    }, 300);
+                } else {
+                    // Already reloaded - show welcome browser first
+                    showMainContent();
+                    
+                    // Show welcome browser after dashboard is ready
+                    setTimeout(() => {
+                        cloakSelf();
+                        showCyberBrowser();
+                        showNotification('Cloaked', 'Opened in secure window', 'success');
+                    }, 500);
+                }
             } else {
                 document.getElementById('loginModal').style.display = 'flex';
                 document.getElementById('introModal').style.display = 'none';
@@ -2655,12 +2714,10 @@ Note: Real IP is masked for privacy`;
             errorMsg.style.display = 'none';
             
             saveSession();
-            renderLinks();
-            updatePremiumUI();
             
+            // Go to reload flow instead of directly showing dashboard
             setTimeout(() => {
-                document.getElementById('loginModal').style.display = 'none';
-                document.getElementById('mainContent').style.display = 'flex';
+                proceedToReload();
                 logToTerminal(`Premium activated with key: ${key}`, 'success');
                 showNotification('Premium Activated', 'You now have access to all features!');
             }, 800);
@@ -2676,8 +2733,8 @@ Note: Real IP is masked for privacy`;
         function skipLogin() {
             isPremium = false;
             usedKey = null;
-            saveSession();
-            showMainContent();
+            // Go to reload flow
+            proceedToReload();
         }
 
         function saveSession() {
@@ -2735,29 +2792,29 @@ Note: Real IP is masked for privacy`;
             document.getElementById('loginModal').style.display = 'none';
             document.getElementById('mainContent').style.display = 'flex';
             
-            document.getElementById('userDisplayName').textContent = username;
-            document.getElementById('greeting').textContent = `Hello, ${username}!`;
-            document.getElementById('topBarUsername').textContent = username;
+            // Ensure username is set before displaying
+            document.getElementById('userDisplayName').textContent = username || 'User';
+            document.getElementById('greeting').textContent = `Hello, ${username || 'User'}!`;
+            document.getElementById('topBarUsername').textContent = username || 'User';
             
             updatePremiumUI();
             initApp();
             initTopStatusBar();
+        }
+        
+        // Called after login/intro completion (first time - before reload)
+        function proceedToReload() {
+            // Save session first
+            saveSession();
             
-            // Check if we need to reload for initialization
-            if (checkReloadNeeded()) {
-                // Show reload modal
-                setTimeout(() => {
-                    document.getElementById('reloadModal').style.display = 'flex';
-                }, 500);
-            } else {
-                // We've reloaded, now show the welcome browser
-                // Also cloak ourselves
-                setTimeout(() => {
-                    cloakSelf();
-                    showCyberBrowser();
-                    showNotification('Cloaked', 'Opened in secure window', 'success');
-                }, 1000);
-            }
+            // Show reload modal
+            document.getElementById('mainContent').style.display = 'none';
+            document.getElementById('loginModal').style.display = 'none';
+            document.getElementById('introModal').style.display = 'none';
+            
+            setTimeout(() => {
+                document.getElementById('reloadModal').style.display = 'flex';
+            }, 300);
         }
 
         // ==========================================
@@ -3205,27 +3262,22 @@ Note: Real IP is masked for privacy`;
 
         function showCyberBrowser() {
             const browser = document.getElementById('cyberBrowser');
-            const username = document.getElementById('userDisplayName').textContent || 'User';
+            const usernameEl = document.getElementById('userDisplayName');
+            const displayName = usernameEl && usernameEl.textContent && usernameEl.textContent !== 'User' 
+                ? usernameEl.textContent 
+                : username || 'User';
             const tier = isPremium ? 'PREMIUM' : 'FREE';
             
             // Generate random session ID
             const sessionId = '0x' + Math.random().toString(16).substr(2, 8).toUpperCase();
             
-            document.getElementById('cyberBrowserUsername').textContent = username;
+            document.getElementById('cyberBrowserUsername').textContent = displayName;
             document.getElementById('cyberBrowserTier').textContent = tier;
             document.getElementById('sessionId').textContent = sessionId;
             
             browser.style.display = 'block';
-            
-            // Animate in
-            browser.style.opacity = '0';
-            browser.style.transform = 'translate(-50%, -50%) scale(0.9)';
-            
-            setTimeout(() => {
-                browser.style.transition = 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
-                browser.style.opacity = '1';
-                browser.style.transform = 'translate(-50%, -50%) scale(1)';
-            }, 50);
+            browser.classList.remove('animate-out');
+            browser.classList.add('animate-in');
             
             // Initialize dragging
             initDraggableBrowser();
@@ -3234,60 +3286,68 @@ Note: Real IP is masked for privacy`;
         function closeCyberBrowser() {
             const browser = document.getElementById('cyberBrowser');
             
-            browser.style.opacity = '0';
-            browser.style.transform = 'translate(-50%, -50%) scale(0.9)';
+            browser.classList.remove('animate-in');
+            browser.classList.add('animate-out');
             
             setTimeout(() => {
                 browser.style.display = 'none';
-            }, 400);
+                browser.classList.remove('animate-out');
+            }, 300);
         }
 
+        // Optimized dragging with requestAnimationFrame
+        let dragRAF = null;
         function initDraggableBrowser() {
             const browser = document.getElementById('cyberBrowser');
             const header = document.getElementById('cyberBrowserHeader');
+            
+            // Remove existing listeners to prevent duplicates
+            const newHeader = header.cloneNode(true);
+            header.parentNode.replaceChild(newHeader, header);
             
             let isDragging = false;
             let currentX = 0;
             let currentY = 0;
             let initialX = 0;
             let initialY = 0;
-            let xOffset = 0;
-            let yOffset = 0;
 
-            header.addEventListener('mousedown', dragStart);
+            newHeader.addEventListener('mousedown', dragStart);
             document.addEventListener('mousemove', drag);
             document.addEventListener('mouseup', dragEnd);
 
             function dragStart(e) {
                 if (e.target.closest('.cyber-browser-dot')) return;
                 
-                initialX = e.clientX - xOffset;
-                initialY = e.clientY - yOffset;
+                initialX = e.clientX - currentX;
+                initialY = e.clientY - currentY;
 
-                if (e.target === header || header.contains(e.target)) {
+                if (e.target === newHeader || newHeader.contains(e.target)) {
                     isDragging = true;
                     browser.classList.add('dragging');
+                    e.preventDefault();
                 }
             }
 
             function drag(e) {
-                if (isDragging) {
-                    e.preventDefault();
-                    currentX = e.clientX - initialX;
-                    currentY = e.clientY - initialY;
+                if (!isDragging) return;
+                e.preventDefault();
+                
+                currentX = e.clientX - initialX;
+                currentY = e.clientY - initialY;
 
-                    xOffset = currentX;
-                    yOffset = currentY;
-
-                    browser.style.transform = `translate(calc(-50% + ${currentX}px), calc(-50% + ${currentY}px))`;
-                }
+                // Use requestAnimationFrame for smooth updates
+                if (dragRAF) cancelAnimationFrame(dragRAF);
+                dragRAF = requestAnimationFrame(() => {
+                    browser.style.marginLeft = `calc(-300px + ${currentX}px)`;
+                    browser.style.marginTop = `calc(-200px + ${currentY}px)`;
+                });
             }
 
             function dragEnd() {
-                initialX = currentX;
-                initialY = currentY;
+                if (!isDragging) return;
                 isDragging = false;
                 browser.classList.remove('dragging');
+                if (dragRAF) cancelAnimationFrame(dragRAF);
             }
         }
 
