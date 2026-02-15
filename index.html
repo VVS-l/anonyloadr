@@ -584,6 +584,139 @@
             to { opacity: 1; }
         }
 
+        /* Discord Section */
+        .discord-section {
+            background: linear-gradient(135deg, rgba(88, 101, 242, 0.1) 0%, rgba(0, 0, 0, 0.3) 100%);
+            border: 2px solid rgba(88, 101, 242, 0.5);
+            border-radius: 16px;
+            padding: 30px;
+            margin-top: 30px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 30px rgba(88, 101, 242, 0.1), inset 0 0 60px rgba(88, 101, 242, 0.05);
+        }
+        .discord-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: repeating-linear-gradient(
+                45deg,
+                transparent,
+                transparent 10px,
+                rgba(88, 101, 242, 0.03) 10px,
+                rgba(88, 101, 242, 0.03) 20px
+            );
+            pointer-events: none;
+        }
+        .discord-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            position: relative;
+        }
+        .discord-logo {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #5865F2 0%, #7289DA 50%, #5865F2 100%);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            box-shadow: 0 10px 30px rgba(88, 101, 242, 0.4);
+            position: relative;
+            border: 2px solid rgba(114, 137, 218, 0.5);
+        }
+        .discord-logo::after {
+            content: 'SOON';
+            position: absolute;
+            bottom: -8px;
+            right: -12px;
+            background: linear-gradient(90deg, #ff00a0, #ff4444);
+            color: white;
+            font-size: 0.6rem;
+            font-weight: bold;
+            padding: 3px 10px;
+            border-radius: 10px;
+            animation: pulse 2s infinite;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 10px rgba(255, 0, 160, 0.3);
+        }
+        .coming-soon-badge {
+            display: inline-block;
+            background: linear-gradient(90deg, #ff00a0, #ff4444);
+            color: white;
+            padding: 5px 14px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            animation: shimmer 2s infinite;
+            margin-left: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 15px rgba(255, 0, 160, 0.3);
+        }
+        .discord-features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 25px;
+            position: relative;
+        }
+        .discord-feature {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(88, 101, 242, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        .discord-feature:hover {
+            border-color: rgba(88, 101, 242, 0.7);
+            transform: translateY(-5px);
+            background: rgba(88, 101, 242, 0.15);
+            box-shadow: 0 10px 30px rgba(88, 101, 242, 0.2);
+        }
+        .discord-feature-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+        .discord-feature-title {
+            font-weight: 600;
+            color: #7289DA;
+            margin-bottom: 5px;
+        }
+        .discord-feature-desc {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.5);
+        }
+        .discord-notify-btn {
+            background: linear-gradient(135deg, #5865F2 0%, #7289DA 100%);
+            color: white;
+            padding: 16px 45px;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            border: 2px solid rgba(114, 137, 218, 0.5);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 25px rgba(88, 101, 242, 0.4), inset 0 1px 0 rgba(255,255,255,0.1);
+            position: relative;
+            display: inline-block;
+        }
+        .discord-notify-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 35px rgba(88, 101, 242, 0.6), inset 0 1px 0 rgba(255,255,255,0.2);
+            border-color: rgba(114, 137, 218, 0.8);
+        }
+        .discord-notify-btn:active {
+            transform: translateY(-1px);
+        }
+
         /* Chatter Section */
         .chatter-section {
             background: linear-gradient(135deg, rgba(88, 101, 242, 0.1) 0%, rgba(0, 240, 255, 0.05) 100%);
@@ -1422,6 +1555,7 @@
                 <button class="tab-btn active" onclick="switchMainTab('proxies', this)">🌐 Proxies</button>
                 <button class="tab-btn" onclick="switchMainTab('slots', this)">📌 My Slots</button>
                 <button class="tab-btn" onclick="switchMainTab('chatter', this)">💬 Chatter</button>
+                <button class="tab-btn" onclick="switchMainTab('discord', this)">👾 Discord</button>
                 <button class="tab-btn" onclick="switchMainTab('tools', this)">🛠 Tools</button>
             </div>
 
@@ -1488,6 +1622,60 @@
                     <!-- Live Chat Simulation -->
                     <div class="chat-simulation" id="chatSimulation">
                         <div class="text-xs text-gray-500 mb-2">Live Activity</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Discord Tab -->
+            <div id="main-tab-discord" class="tab-content">
+                <div class="discord-section">
+                    <div class="discord-header">
+                        <div class="discord-logo">👾</div>
+                        <div>
+                            <h3 class="text-2xl font-bold" style="color: #7289DA;">
+                                Discord <span class="coming-soon-badge">Coming Soon</span>
+                            </h3>
+                            <p class="text-sm text-gray-400">Join our official Discord community</p>
+                        </div>
+                    </div>
+                    
+                    <p class="text-gray-300 leading-relaxed mb-6">
+                        Our Discord server is launching soon! This will be your hub for exclusive access to 
+                        <strong style="color: #7289DA;">new proxy links</strong>, 
+                        <strong style="color: #00f0ff;">platform updates</strong>, and 
+                        <strong style="color: #ff00a0;">premium keys</strong>. 
+                        Be the first to know about new features and get direct support from our team.
+                    </p>
+
+                    <div class="discord-features">
+                        <div class="discord-feature">
+                            <div class="discord-feature-icon">🔗</div>
+                            <div class="discord-feature-title">New Links</div>
+                            <div class="discord-feature-desc">Get instant access to fresh proxy links as soon as they're available</div>
+                        </div>
+                        <div class="discord-feature">
+                            <div class="discord-feature-icon">🚀</div>
+                            <div class="discord-feature-title">Updates</div>
+                            <div class="discord-feature-desc">Stay informed about the latest platform updates and features</div>
+                        </div>
+                        <div class="discord-feature">
+                            <div class="discord-feature-icon">🗝️</div>
+                            <div class="discord-feature-title">Premium Keys</div>
+                            <div class="discord-feature-desc">Exclusive giveaways and early access to premium activation keys</div>
+                        </div>
+                        <div class="discord-feature">
+                            <div class="discord-feature-icon">💬</div>
+                            <div class="discord-feature-title">Community</div>
+                            <div class="discord-feature-desc">Connect with other users and get help from the support team</div>
+                        </div>
+                    </div>
+
+                    <div class="mt-8 text-center">
+                        <button onclick="notifyDiscordLaunch()" class="discord-notify-btn">
+                            🔔 Notify Me When Live
+                        </button>
+                        <p class="text-xs text-gray-500 mt-3">
+                            We'll send a notification when the Discord server is ready</p>
                     </div>
                 </div>
             </div>
@@ -2688,6 +2876,33 @@ Note: Real IP is masked for privacy`;
         }
 
         // ==========================================
+        // DISCORD
+        // ==========================================
+
+        let discordNotifyRequested = false;
+
+        function notifyDiscordLaunch() {
+            if (discordNotifyRequested) {
+                showNotification('Already Subscribed', 'You will be notified when Discord goes live!', 'info');
+                return;
+            }
+            
+            discordNotifyRequested = true;
+            showNotification('Notification Set!', 'We will notify you when the Discord server launches', 'success');
+            logToTerminal('Discord launch notification requested', 'success');
+            
+            // Store in localStorage so it persists
+            localStorage.setItem('anonyLoadr_discord_notify', 'true');
+        }
+
+        function checkDiscordNotification() {
+            const requested = localStorage.getItem('anonyLoadr_discord_notify');
+            if (requested === 'true') {
+                discordNotifyRequested = true;
+            }
+        }
+
+        // ==========================================
         // TOOLS
         // ==========================================
 
@@ -2898,6 +3113,7 @@ Note: Real IP is masked for privacy`;
             applySettings();
             simulateChat();
             initDataBar();
+            checkDiscordNotification();
             
             if (settings.theme) {
                 setTheme(settings.theme);
