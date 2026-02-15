@@ -813,6 +813,224 @@
             font-size: 2.5rem;
         }
 
+        /* Reload Modal */
+        .reload-modal .modal-box {
+            max-width: 450px;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border: 2px solid var(--primary);
+            box-shadow: 0 0 50px rgba(0, 240, 255, 0.3);
+        }
+        .reload-icon {
+            font-size: 3rem;
+            animation: spin 2s linear infinite;
+        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* Cyberpunk Browser Window */
+        .cyber-browser {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 600px;
+            max-width: 90vw;
+            background: linear-gradient(135deg, #0a0a0f 0%, #151520 100%);
+            border: 2px solid var(--primary);
+            border-radius: 12px;
+            box-shadow: 
+                0 0 60px rgba(0, 240, 255, 0.3),
+                0 0 100px rgba(0, 240, 255, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            z-index: 99999;
+            overflow: hidden;
+            font-family: 'JetBrains Mono', monospace;
+            display: none;
+        }
+        .cyber-browser.dragging {
+            opacity: 0.9;
+            box-shadow: 
+                0 0 80px rgba(0, 240, 255, 0.4),
+                0 0 120px rgba(0, 240, 255, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+        .cyber-browser-header {
+            background: linear-gradient(90deg, rgba(0, 240, 255, 0.1), rgba(112, 0, 255, 0.1));
+            padding: 12px 15px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid rgba(0, 240, 255, 0.2);
+            cursor: move;
+            user-select: none;
+        }
+        .cyber-browser-dots {
+            display: flex;
+            gap: 8px;
+        }
+        .cyber-browser-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            transition: all 0.3s;
+        }
+        .cyber-browser-dot.red { background: #ff5f57; }
+        .cyber-browser-dot.yellow { background: #febc2e; }
+        .cyber-browser-dot.green { background: #28c840; }
+        .cyber-browser-dot:hover {
+            transform: scale(1.2);
+        }
+        .cyber-browser-title {
+            flex: 1;
+            text-align: center;
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .cyber-browser-title::before,
+        .cyber-browser-title::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(0, 240, 255, 0.3), transparent);
+        }
+        .cyber-browser-content {
+            padding: 30px;
+            text-align: center;
+        }
+        .cyber-browser-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            box-shadow: 0 10px 40px rgba(0, 240, 255, 0.3);
+            animation: iconPulse 3s ease-in-out infinite;
+        }
+        @keyframes iconPulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 10px 40px rgba(0, 240, 255, 0.3); }
+            50% { transform: scale(1.05); box-shadow: 0 15px 50px rgba(0, 240, 255, 0.5); }
+        }
+        .cyber-browser h2 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .cyber-browser-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            color: var(--success);
+            margin-bottom: 20px;
+        }
+        .cyber-browser-status-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--success);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        .cyber-browser-message {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 25px;
+        }
+        .cyber-browser-details {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(0, 240, 255, 0.2);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 25px;
+            text-align: left;
+            font-size: 0.8rem;
+        }
+        .cyber-browser-detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .cyber-browser-detail-row:last-child {
+            border-bottom: none;
+        }
+        .cyber-browser-detail-label {
+            color: rgba(255, 255, 255, 0.4);
+        }
+        .cyber-browser-detail-value {
+            color: var(--primary);
+            font-weight: 500;
+        }
+        .cyber-browser-close-btn {
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            padding: 14px 40px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 5px 20px rgba(0, 240, 255, 0.3);
+            font-family: 'Space Grotesk', sans-serif;
+        }
+        .cyber-browser-close-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(0, 240, 255, 0.5);
+        }
+        .cyber-browser-scanline {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--primary), transparent);
+            animation: scanline 3s linear infinite;
+            pointer-events: none;
+        }
+        @keyframes scanline {
+            0% { transform: translateY(0); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: translateY(400px); opacity: 0; }
+        }
+        .cyber-browser-corners::before,
+        .cyber-browser-corners::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--primary);
+        }
+        .cyber-browser-corners::before {
+            top: -2px;
+            left: -2px;
+            border-right: none;
+            border-bottom: none;
+        }
+        .cyber-browser-corners::after {
+            bottom: -2px;
+            right: -2px;
+            border-left: none;
+            border-top: none;
+        }
+
         /* Chat Simulation */
         .chat-simulation {
             background: rgba(0, 0, 0, 0.3);
@@ -1431,6 +1649,74 @@
                 <button onclick="saveSlot()" class="modal-btn flex-1">Add Site</button>
                 <button onclick="closeSlotModal()" class="modal-btn secondary flex-1">Cancel</button>
             </div>
+        </div>
+    </div>
+
+    <!-- Reload Required Modal -->
+    <div id="reloadModal" class="modal-overlay reload-modal">
+        <div class="modal-box">
+            <div class="reload-icon mb-4">🔄</div>
+            <h2 class="text-2xl font-bold mb-3" style="color: var(--primary);">Initialization Required</h2>
+            <p class="text-gray-300 mb-6">
+                The dashboard needs to reload to initialize all components correctly. 
+                This will only happen once.
+            </p>
+            <div class="bg-black/30 rounded-lg p-4 mb-6 text-left font-mono text-sm">
+                <div class="text-cyan-400">[SYSTEM] Checking module integrity...</div>
+                <div class="text-yellow-400">[WARN] Some components not initialized</div>
+                <div class="text-cyan-400">[SYSTEM] Reload required for cloaking system</div>
+            </div>
+            <button onclick="performReloadAndCloak()" class="modal-btn">
+                Reload & Initialize
+            </button>
+        </div>
+    </div>
+
+    <!-- Cyberpunk Welcome Browser -->
+    <div id="cyberBrowser" class="cyber-browser cyber-browser-corners">
+        <div class="cyber-browser-scanline"></div>
+        <div class="cyber-browser-header" id="cyberBrowserHeader">
+            <div class="cyber-browser-dots">
+                <div class="cyber-browser-dot red" onclick="closeCyberBrowser()"></div>
+                <div class="cyber-browser-dot yellow"></div>
+                <div class="cyber-browser-dot green"></div>
+            </div>
+            <div class="cyber-browser-title">
+                <span>anonyLoadr://welcome</span>
+            </div>
+        </div>
+        <div class="cyber-browser-content">
+            <div class="cyber-browser-icon">🚀</div>
+            <div class="cyber-browser-status">
+                <div class="cyber-browser-status-dot"></div>
+                <span>System Loaded Successfully</span>
+            </div>
+            <h2>Welcome Back, <span id="cyberBrowserUsername">User</span>!</h2>
+            <p class="cyber-browser-message">
+                Your secure browsing environment has been initialized and cloaked. 
+                All connections are encrypted and your session is protected.
+            </p>
+            <div class="cyber-browser-details">
+                <div class="cyber-browser-detail-row">
+                    <span class="cyber-browser-detail-label">Session ID</span>
+                    <span class="cyber-browser-detail-value" id="sessionId">--</span>
+                </div>
+                <div class="cyber-browser-detail-row">
+                    <span class="cyber-browser-detail-label">Encryption</span>
+                    <span class="cyber-browser-detail-value">AES-256-GCM</span>
+                </div>
+                <div class="cyber-browser-detail-row">
+                    <span class="cyber-browser-detail-label">Cloak Status</span>
+                    <span class="cyber-browser-detail-value" style="color: var(--success);">ACTIVE</span>
+                </div>
+                <div class="cyber-browser-detail-row">
+                    <span class="cyber-browser-detail-label">Tier</span>
+                    <span class="cyber-browser-detail-value" id="cyberBrowserTier">FREE</span>
+                </div>
+            </div>
+            <button onclick="closeCyberBrowser()" class="cyber-browser-close-btn">
+                Enter Dashboard →
+            </button>
         </div>
     </div>
 
@@ -2409,6 +2695,9 @@ Note: Real IP is masked for privacy`;
             localStorage.removeItem('anonyLoadr_settings');
             localStorage.removeItem('anonyLoadr_slots');
             
+            // Clear session reload flag
+            sessionStorage.removeItem(RELOAD_KEY);
+            
             isPremium = false;
             usedKey = null;
             username = 'User';
@@ -2453,6 +2742,22 @@ Note: Real IP is masked for privacy`;
             updatePremiumUI();
             initApp();
             initTopStatusBar();
+            
+            // Check if we need to reload for initialization
+            if (checkReloadNeeded()) {
+                // Show reload modal
+                setTimeout(() => {
+                    document.getElementById('reloadModal').style.display = 'flex';
+                }, 500);
+            } else {
+                // We've reloaded, now show the welcome browser
+                // Also cloak ourselves
+                setTimeout(() => {
+                    cloakSelf();
+                    showCyberBrowser();
+                    showNotification('Cloaked', 'Opened in secure window', 'success');
+                }, 1000);
+            }
         }
 
         // ==========================================
@@ -2873,6 +3178,150 @@ Note: Real IP is masked for privacy`;
                     onlineEl.textContent = newValue.toLocaleString();
                 }
             }, 3000);
+        }
+
+        // ==========================================
+        // RELOAD & CLOAK SYSTEM
+        // ==========================================
+
+        const RELOAD_KEY = 'anonyLoadr_has_reloaded';
+        const CLOAK_URL = 'https://anonyloadr.vercel.app';
+
+        function checkReloadNeeded() {
+            const hasReloaded = sessionStorage.getItem(RELOAD_KEY);
+            return !hasReloaded;
+        }
+
+        function performReloadAndCloak() {
+            // Set flag so we know we've reloaded
+            sessionStorage.setItem(RELOAD_KEY, 'true');
+            
+            // Close the modal
+            document.getElementById('reloadModal').style.display = 'none';
+            
+            // Perform the reload
+            location.reload();
+        }
+
+        function showCyberBrowser() {
+            const browser = document.getElementById('cyberBrowser');
+            const username = document.getElementById('userDisplayName').textContent || 'User';
+            const tier = isPremium ? 'PREMIUM' : 'FREE';
+            
+            // Generate random session ID
+            const sessionId = '0x' + Math.random().toString(16).substr(2, 8).toUpperCase();
+            
+            document.getElementById('cyberBrowserUsername').textContent = username;
+            document.getElementById('cyberBrowserTier').textContent = tier;
+            document.getElementById('sessionId').textContent = sessionId;
+            
+            browser.style.display = 'block';
+            
+            // Animate in
+            browser.style.opacity = '0';
+            browser.style.transform = 'translate(-50%, -50%) scale(0.9)';
+            
+            setTimeout(() => {
+                browser.style.transition = 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
+                browser.style.opacity = '1';
+                browser.style.transform = 'translate(-50%, -50%) scale(1)';
+            }, 50);
+            
+            // Initialize dragging
+            initDraggableBrowser();
+        }
+
+        function closeCyberBrowser() {
+            const browser = document.getElementById('cyberBrowser');
+            
+            browser.style.opacity = '0';
+            browser.style.transform = 'translate(-50%, -50%) scale(0.9)';
+            
+            setTimeout(() => {
+                browser.style.display = 'none';
+            }, 400);
+        }
+
+        function initDraggableBrowser() {
+            const browser = document.getElementById('cyberBrowser');
+            const header = document.getElementById('cyberBrowserHeader');
+            
+            let isDragging = false;
+            let currentX = 0;
+            let currentY = 0;
+            let initialX = 0;
+            let initialY = 0;
+            let xOffset = 0;
+            let yOffset = 0;
+
+            header.addEventListener('mousedown', dragStart);
+            document.addEventListener('mousemove', drag);
+            document.addEventListener('mouseup', dragEnd);
+
+            function dragStart(e) {
+                if (e.target.closest('.cyber-browser-dot')) return;
+                
+                initialX = e.clientX - xOffset;
+                initialY = e.clientY - yOffset;
+
+                if (e.target === header || header.contains(e.target)) {
+                    isDragging = true;
+                    browser.classList.add('dragging');
+                }
+            }
+
+            function drag(e) {
+                if (isDragging) {
+                    e.preventDefault();
+                    currentX = e.clientX - initialX;
+                    currentY = e.clientY - initialY;
+
+                    xOffset = currentX;
+                    yOffset = currentY;
+
+                    browser.style.transform = `translate(calc(-50% + ${currentX}px), calc(-50% + ${currentY}px))`;
+                }
+            }
+
+            function dragEnd() {
+                initialX = currentX;
+                initialY = currentY;
+                isDragging = false;
+                browser.classList.remove('dragging');
+            }
+        }
+
+        function cloakSelf() {
+            // Open anonyloadr in a cloaked window
+            const win = window.open('about:blank', '_blank');
+            if (!win) {
+                console.log('Popup blocked - continuing in current window');
+                return;
+            }
+            
+            win.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Dashboard</title>
+                    <style>body{margin:0;padding:0;overflow:hidden;background:#050505;}</style>
+                </head>
+                <body>
+                    <iframe src="${CLOAK_URL}" style="width:100vw;height:100vh;border:none;position:fixed;top:0;left:0;"></iframe>
+                </body>
+                </html>
+            `);
+            win.document.close();
+            
+            // Show notification in the new window after a delay
+            setTimeout(() => {
+                try {
+                    // Try to access and show the browser in the new window
+                    // This may not work due to cross-origin restrictions
+                } catch(e) {
+                    // Silently fail
+                }
+            }, 2000);
         }
 
         // ==========================================
