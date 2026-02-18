@@ -324,6 +324,13 @@
             text-align: center;
             text-decoration: none;
             display: block;
+            background-color: white;
+            color: #1a73e8;
+        }
+
+        .modal-btn:hover {
+            background-color: #f8f9fa;
+            border-color: #1a73e8;
         }
 
         .modal-btn-primary {
@@ -335,17 +342,6 @@
         .modal-btn-primary:hover {
             background-color: #1557b0;
             box-shadow: 0 1px 2px 0 rgba(66, 133, 244, 0.3);
-        }
-
-        .modal-btn-secondary {
-            background-color: white;
-            color: #1a73e8;
-            border-color: #dadce0;
-        }
-
-        .modal-btn-secondary:hover {
-            background-color: #f8f9fa;
-            border-color: #1a73e8;
         }
 
         .modal-cancel {
@@ -467,15 +463,15 @@
                 <p>Select where you'd like to go</p>
             </div>
             <div class="modal-buttons">
-                <button class="modal-btn modal-btn-primary" onclick="cloakAndRedirect('anonyloadr')">
+                <button class="modal-btn modal-btn-primary" id="anonyBtn">
                     AnonyLoadr
                 </button>
-                <button class="modal-btn modal-btn-secondary" onclick="cloakAndRedirect('chatter')">
+                <button class="modal-btn modal-btn-secondary" id="chatterBtn">
                     Chatter
                 </button>
             </div>
             <div class="modal-cancel">
-                <button class="modal-cancel-btn" onclick="closeModal()">Cancel</button>
+                <button class="modal-cancel-btn" id="cancelBtn">Cancel</button>
             </div>
         </div>
     </div>
@@ -484,44 +480,80 @@
         // URLs configuration - update the chatter URL here
         const urls = {
             anonyloadr: 'https://anonyloadr.vercel.app',
-            chatter: 'https://chatter-5ufw.onrender.com/' // <-- UPDATE THIS URL
+            chatter: 'https://your-chatter-url-here.com' // <-- UPDATE THIS URL
         };
 
+        let modalShown = false;
+
         function showModal() {
+            if (modalShown) return;
+            modalShown = true;
             document.getElementById('choiceModal').classList.add('active');
         }
 
         function closeModal() {
             document.getElementById('choiceModal').classList.remove('active');
+            modalShown = false;
         }
 
         function cloakAndRedirect(site) {
             const targetUrl = urls[site];
+            if (!targetUrl || targetUrl === 'https://your-chatter-url-here.com') {
+                alert('Please configure the ' + site + ' URL in the script first!');
+                return;
+            }
             
             // Open cloaked site in new window
-            var win = window.open();
+            var win = window.open('about:blank', '_blank');
             if (win) {
-                win.document.write('<iframe src="' + targetUrl + '" style="width:100%;height:100vh;border:none;"></iframe>');
-                win.document.body.style.margin = "0";
-                win.document.body.style.overflow = "hidden";
-                win.document.title = "Google";
+                win.document.write(`
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <title>Google</title>
+                        <meta charset="UTF-8">
+                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                        <style>
+                            body { margin: 0; overflow: hidden; }
+                            iframe { width: 100vw; height: 100vh; border: none; }
+                        </style>
+                    </head>
+                    <body>
+                        <iframe src="${targetUrl}" sandbox="allow-same-origin allow-scripts allow-popups allow-forms"></iframe>
+                    </body>
+                    </html>
+                `);
+                win.document.close();
                 
-                // Replace this page with Google
-                window.location.replace("https://google.com");
+                // Navigate current tab to Google
+                window.location.href = "https://google.com";
+            } else {
+                alert('Popup blocked! Please allow popups for this site.');
             }
         }
 
-        // Trigger on Enter key in search box
+        // Event listeners
         document.getElementById('searchInput').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
+                e.preventDefault();
                 showModal();
             }
         });
 
-        // Trigger on Google Search button click
-        document.getElementById('searchBtn').addEventListener('click', function() {
+        document.getElementById('searchBtn').addEventListener('click', function(e) {
+            e.preventDefault();
             showModal();
         });
+
+        document.getElementById('anonyBtn').addEventListener('click', function() {
+            cloakAndRedirect('anonyloadr');
+        });
+
+        document.getElementById('chatterBtn').addEventListener('click', function() {
+            cloakAndRedirect('chatter');
+        });
+
+        document.getElementById('cancelBtn').addEventListener('click', closeModal);
 
         // Close modal when clicking outside
         document.getElementById('choiceModal').addEventListener('click', function(e) {
