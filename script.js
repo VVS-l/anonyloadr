@@ -672,6 +672,7 @@ function fullLogout() {
     localStorage.removeItem('anonyLoadr_intro_seen');
     localStorage.removeItem('anonyLoadr_settings');
     localStorage.removeItem('anonyLoadr_slots');
+    localStorage.removeItem('anonyLoadr_passwords');
     
     // Clear session reload and cloak flags
     sessionStorage.removeItem(RELOAD_KEY);
@@ -940,6 +941,7 @@ function exportData() {
     const data = {
         settings: settings,
         slots: customSlots,
+        passwords: savedPasswords,
         theme: currentTheme,
         exportedAt: new Date().toISOString()
     };
@@ -974,6 +976,11 @@ function importData(input) {
                 customSlots = data.slots;
                 saveSlots();
                 renderSlots();
+            }
+            
+            if (data.passwords) {
+                savedPasswords = data.passwords;
+                savePasswords();
             }
             
             if (data.theme) {
@@ -1017,6 +1024,7 @@ function renderSlots() {
     customSlots.forEach((slot, index) => {
         const card = document.createElement('div');
         card.className = 'slot-card occupied p-6 rounded-xl cursor-pointer relative group';
+        const isCloaked = slot.cloak !== false; // Default to true if not set
         card.innerHTML = `
             <button onclick="event.stopPropagation(); deleteSlot(${index})" 
                 class="absolute top-2 right-2 w-6 h-6 bg-red-500/20 text-red-400 rounded-full 
@@ -1032,11 +1040,18 @@ function renderSlots() {
             <h3 class="text-xl font-bold mb-2 group-hover:text-green-400 transition-colors">${slot.name}</h3>
             <p class="text-sm text-gray-400 group-hover:text-gray-300">${slot.desc || 'Custom site slot'}</p>
             <div class="mt-4 flex items-center gap-2 text-xs text-white/20 group-hover:text-green-400/60 transition-colors">
-                <span class="w-1.5 h-1.5 rounded-full bg-current animate-pulse"></span>
-                <span class="font-mono">SAVED</span>
+                <span class="w-1.5 h-1.5 rounded-full ${isCloaked ? 'bg-cyan-400' : 'bg-yellow-400'}"></span>
+                <span class="font-mono">${isCloaked ? 'CLOAKED' : 'DIRECT'}</span>
             </div>
         `;
-        card.addEventListener('click', () => cloakOpen(slot.url, slot.name));
+        // Use cloakOpen or window.open based on slot setting
+        card.addEventListener('click', () => {
+            if (isCloaked) {
+                cloakOpen(slot.url, slot.name);
+            } else {
+                window.open(slot.url, '_blank');
+            }
+        });
         grid.appendChild(card);
     });
 }
@@ -1051,12 +1066,14 @@ function closeSlotModal() {
     document.getElementById('slotName').value = '';
     document.getElementById('slotUrl').value = '';
     document.getElementById('slotDesc').value = '';
+    document.getElementById('slotCloakToggle').checked = true;
 }
 
 function saveSlot() {
     const name = document.getElementById('slotName').value.trim();
     const url = document.getElementById('slotUrl').value.trim();
     const desc = document.getElementById('slotDesc').value.trim();
+    const cloak = document.getElementById('slotCloakToggle').checked;
     
     if (!name || !url) {
         showNotification('Error', 'Name and URL are required', 'error');
@@ -1068,12 +1085,12 @@ function saveSlot() {
         return;
     }
     
-    customSlots.push({ name, url, desc, addedAt: Date.now() });
+    customSlots.push({ name, url, desc, cloak, addedAt: Date.now() });
     saveSlots();
     renderSlots();
     closeSlotModal();
-    showNotification('Site Added', `${name} has been added to your slots`);
-    logToTerminal(`Added custom slot: ${name}`, 'success');
+    showNotification('Site Added', `${name} has been added to your slots (${cloak ? 'Cloaked' : 'Direct'})`);
+    logToTerminal(`Added custom slot: ${name} (${cloak ? 'cloaked' : 'direct'})`, 'success');
 }
 
 function deleteSlot(index) {
@@ -1396,18 +1413,194 @@ function base64Decode() {
     }
 }
 
+// Word list for memorable passwords
+const MEMORABLE_WORDS = [
+    'alpha', 'bravo', 'charlie', 'delta', 'echo', 'foxtrot', 'golf', 'hotel',
+    'india', 'juliet', 'kilo', 'lima', 'mike', 'november', 'oscar', 'papa',
+    'quebec', 'romeo', 'sierra', 'tango', 'uniform', 'victor', 'whiskey', 'xray',
+    'yankee', 'zulu', 'nova', 'pulse', 'cyber', 'ghost', 'shadow', 'phantom',
+    'cipher', 'neon', 'quantum', 'solar', 'lunar', 'stellar', 'cosmic', 'atomic'
+];
+
+function toggleWordMode() {
+    const useWords = document.getElementById('passUseWords').checked;
+    const wordOptions = document.getElementById('wordOptions');
+    if (useWords) {
+        wordOptions.classList.remove('hidden');
+    } else {
+        wordOptions.classList.add('hidden');
+    }
+}
+
 function generatePassword() {
     const length = parseInt(document.getElementById('passLength').value);
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
+    const useUppercase = document.getElementById('passUppercase').checked;
+    const useLowercase = document.getElementById('passLowercase').checked;
+    const useNumbers = document.getElementById('passNumbers').checked;
+    const useSymbols = document.getElementById('passSymbols').checked;
+    const useWords = document.getElementById('passUseWords').checked;
+    const customWordsInput = document.getElementById('passCustomWords').value.trim();
+    
     let password = '';
     
-    for (let i = 0; i < length; i++) {
-        password += chars.charAt(Math.floor(Math.random() * chars.length));
+    if (useWords) {
+        // Generate memorable password with words
+        const words = customWordsInput ? 
+            customWordsInput.split(',').map(w => w.trim()).filter(w => w) :
+            MEMORABLE_WORDS;
+        
+        const numWords = Math.max(2, Math.min(4, Math.floor(length / 6)));
+        const selectedWords = [];
+        
+        for (let i = 0; i < numWords; i++) {
+            let word = words[Math.floor(Math.random() * words.length)];
+            // Randomly capitalize
+            if (useUppercase && Math.random() > 0.5) {
+                word = word.charAt(0).toUpperCase() + word.slice(1);
+            }
+            selectedWords.push(word);
+        }
+        
+        password = selectedWords.join('');
+        
+        // Add numbers and symbols if requested
+        let extraChars = '';
+        if (useNumbers) extraChars += '0123456789';
+        if (useSymbols) extraChars += '!@#$%^&*';
+        
+        if (extraChars) {
+            const numExtras = Math.min(4, Math.floor(length / 4));
+            for (let i = 0; i < numExtras; i++) {
+                password += extraChars.charAt(Math.floor(Math.random() * extraChars.length));
+            }
+        }
+        
+        // Ensure minimum length by padding if needed
+        const allChars = (useUppercase ? 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' : '') +
+                        (useLowercase ? 'abcdefghijklmnopqrstuvwxyz' : '') +
+                        (useNumbers ? '0123456789' : '') +
+                        (useSymbols ? '!@#$%^&*' : '');
+        
+        while (password.length < length && allChars) {
+            password += allChars.charAt(Math.floor(Math.random() * allChars.length));
+        }
+        
+    } else {
+        // Generate random password
+        let chars = '';
+        if (useUppercase) chars += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        if (useLowercase) chars += 'abcdefghijklmnopqrstuvwxyz';
+        if (useNumbers) chars += '0123456789';
+        if (useSymbols) chars += '!@#$%^&*';
+        
+        if (!chars) {
+            showNotification('Error', 'Select at least one character type', 'error');
+            return;
+        }
+        
+        for (let i = 0; i < length; i++) {
+            password += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
     }
     
-    const result = document.getElementById('passwordResult');
-    result.textContent = password;
-    result.classList.remove('hidden');
+    // Display result
+    document.getElementById('passwordResult').textContent = password;
+    document.getElementById('passwordResultContainer').classList.remove('hidden');
+    
+    // Load saved passwords to show the section
+    loadSavedPasswords();
+}
+
+// Saved passwords management
+let savedPasswords = [];
+
+function loadSavedPasswords() {
+    const saved = localStorage.getItem('anonyLoadr_passwords');
+    if (saved) {
+        savedPasswords = JSON.parse(saved);
+    }
+    renderSavedPasswords();
+}
+
+function savePasswords() {
+    localStorage.setItem('anonyLoadr_passwords', JSON.stringify(savedPasswords));
+}
+
+function savePassword() {
+    const password = document.getElementById('passwordResult').textContent;
+    if (!password) return;
+    
+    const note = prompt('Add a note for this password (optional):');
+    
+    savedPasswords.push({
+        password: password,
+        note: note || '',
+        createdAt: Date.now()
+    });
+    
+    savePasswords();
+    renderSavedPasswords();
+    showNotification('Password Saved', 'Password has been saved securely');
+}
+
+function renderSavedPasswords() {
+    const section = document.getElementById('savedPasswordsSection');
+    const list = document.getElementById('savedPasswordsList');
+    
+    if (savedPasswords.length === 0) {
+        section.classList.add('hidden');
+        return;
+    }
+    
+    section.classList.remove('hidden');
+    list.innerHTML = '';
+    
+    // Show most recent first, max 10
+    const recentPasswords = [...savedPasswords].reverse().slice(0, 10);
+    
+    recentPasswords.forEach((item, index) => {
+        const div = document.createElement('div');
+        div.className = 'flex items-center justify-between p-2 bg-black/30 rounded text-sm';
+        
+        const actualIndex = savedPasswords.length - 1 - index;
+        const dateStr = new Date(item.createdAt).toLocaleDateString();
+        
+        div.innerHTML = `
+            <div class="flex-1 min-w-0 mr-2">
+                <div class="font-mono text-cyan-400 truncate">${maskPassword(item.password)}</div>
+                ${item.note ? `<div class="text-xs text-gray-500 truncate">${item.note}</div>` : ''}
+                <div class="text-xs text-gray-600">${dateStr}</div>
+            </div>
+            <div class="flex gap-1">
+                <button onclick="copyToClipboard('${item.password.replace(/'/g, "\\'")}')" class="px-2 py-1 bg-cyan-500/20 text-cyan-400 rounded text-xs hover:bg-cyan-500/30" title="Copy">📋</button>
+                <button onclick="deleteSavedPassword(${actualIndex})" class="px-2 py-1 bg-red-500/20 text-red-400 rounded text-xs hover:bg-red-500/30" title="Delete">🗑️</button>
+            </div>
+        `;
+        list.appendChild(div);
+    });
+}
+
+function maskPassword(password) {
+    if (password.length <= 4) return '****';
+    return password.substring(0, 2) + '•'.repeat(password.length - 4) + password.substring(password.length - 2);
+}
+
+function deleteSavedPassword(index) {
+    if (confirm('Delete this saved password?')) {
+        savedPasswords.splice(index, 1);
+        savePasswords();
+        renderSavedPasswords();
+        showNotification('Password Deleted', 'Password removed from saved list');
+    }
+}
+
+function clearSavedPasswords() {
+    if (confirm('⚠ Delete all saved passwords? This cannot be undone.')) {
+        savedPasswords = [];
+        savePasswords();
+        renderSavedPasswords();
+        showNotification('Cleared', 'All saved passwords have been deleted');
+    }
 }
 
 function generateQR() {
@@ -1568,6 +1761,7 @@ function initApp() {
     simulateChat();
     initDataBar();
     checkDiscordNotification();
+    loadSavedPasswords();
     
     if (settings.theme) {
         setTheme(settings.theme);

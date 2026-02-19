@@ -294,6 +294,20 @@
             <input type="url" id="slotUrl" class="modal-input" placeholder="https://example.com">
             <input type="text" id="slotDesc" class="modal-input" placeholder="Description (optional)">
             
+            <!-- Cloak Toggle -->
+            <div class="setting-item" style="margin: 15px 0;">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <label class="setting-label" style="margin-bottom: 4px;">Cloak this site</label>
+                        <p class="setting-desc" style="margin-bottom: 0;">Open in cloaked about:blank window</p>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="slotCloakToggle" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+            </div>
+            
             <div class="flex gap-3 mt-4">
                 <button onclick="saveSlot()" class="modal-btn flex-1">Add Site</button>
                 <button onclick="closeSlotModal()" class="modal-btn secondary flex-1">Cancel</button>
@@ -650,13 +664,67 @@
                             <span>🔑</span> Password Generator
                         </h4>
                         <p class="text-sm text-gray-400 mb-4">Generate secure passwords</p>
+                        
+                        <!-- Length Slider -->
                         <div class="flex items-center gap-3 mb-4">
                             <label class="text-sm">Length:</label>
-                            <input type="range" id="passLength" min="8" max="32" value="16" class="flex-1" oninput="document.getElementById('passLengthVal').textContent = this.value">
-                            <span id="passLengthVal" class="text-cyan-400 font-mono">16</span>
+                            <input type="range" id="passLength" min="4" max="64" value="16" class="flex-1" oninput="document.getElementById('passLengthVal').textContent = this.value">
+                            <span id="passLengthVal" class="text-cyan-400 font-mono w-8">16</span>
                         </div>
-                        <button onclick="generatePassword()" class="modal-btn mb-2">Generate</button>
-                        <div id="passwordResult" class="p-2 bg-black/30 rounded text-center font-mono text-sm hidden cursor-pointer" onclick="copyToClipboard(this.textContent)"></div>
+                        
+                        <!-- Character Type Toggles -->
+                        <div class="grid grid-cols-2 gap-2 mb-4 text-sm">
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="checkbox" id="passUppercase" checked class="accent-cyan-400">
+                                <span>ABC</span>
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="checkbox" id="passLowercase" checked class="accent-cyan-400">
+                                <span>abc</span>
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="checkbox" id="passNumbers" checked class="accent-cyan-400">
+                                <span>123</span>
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="checkbox" id="passSymbols" checked class="accent-cyan-400">
+                                <span>!@#</span>
+                            </label>
+                        </div>
+                        
+                        <!-- Include Words Toggle -->
+                        <div class="flex items-center justify-between mb-4 p-2 bg-white/5 rounded">
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="checkbox" id="passUseWords" class="accent-cyan-400" onchange="toggleWordMode()">
+                                <span class="text-sm">Include memorable words</span>
+                            </label>
+                        </div>
+                        
+                        <!-- Word Options (hidden by default) -->
+                        <div id="wordOptions" class="hidden mb-4">
+                            <input type="text" id="passCustomWords" class="modal-input" placeholder="Enter custom words (comma separated)..." style="margin-bottom: 8px;">
+                            <p class="text-xs text-gray-500">Or leave empty for random words</p>
+                        </div>
+                        
+                        <button onclick="generatePassword()" class="modal-btn mb-3">Generate</button>
+                        
+                        <!-- Result -->
+                        <div id="passwordResultContainer" class="hidden">
+                            <div id="passwordResult" class="p-2 bg-black/30 rounded text-center font-mono text-sm mb-2 break-all"></div>
+                            <div class="flex gap-2">
+                                <button onclick="copyToClipboard(document.getElementById('passwordResult').textContent)" class="modal-btn secondary flex-1 text-xs py-2">📋 Copy</button>
+                                <button onclick="savePassword()" class="modal-btn flex-1 text-xs py-2">💾 Save</button>
+                            </div>
+                        </div>
+                        
+                        <!-- Saved Passwords -->
+                        <div id="savedPasswordsSection" class="mt-4 hidden">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-sm text-gray-400">Saved Passwords</span>
+                                <button onclick="clearSavedPasswords()" class="text-xs text-red-400 hover:text-red-300">Clear All</button>
+                            </div>
+                            <div id="savedPasswordsList" class="max-h-32 overflow-y-auto space-y-2"></div>
+                        </div>
                     </div>
 
                     <!-- QR Code Generator -->
